@@ -39,9 +39,14 @@ add protection evil icon
 add sanc aura wear/remove
 add haste boots wear/remove
 handle wraith form
+
 -- [DONE] MAKE NUMBERS SHOW GREEN WHEN OVER 10 MINUTES, YELLOW WHEN UNDER 10, RED WHEN UNDER 2 BLACK WHEN OFF?
+
 --when logging on use priority system to load grey images of all priorities
+
 -- [DONE] FIX DRAWING OF TIMERS WHEN VERTICAL DRAWING
--- ADD AN ACTUAL FUCKTON MORE AFFECT_ICONS AND ASSIGN TO SPELL NUMBERS                                    ]]--
+
+-- ADD AN ACTUAL FUCKTON MORE AFFECT_ICONS AND ASSIGN TO SPELL NUMBERS    
+]]--
 	----------------------------------------------------------------------------------------------------------
 	----------------------------------------------------------------------------------------------------------
