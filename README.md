@@ -17,38 +17,40 @@ in the window.
 
 ------------------------------------------------TO DO --------------------------------------------------------
 
---[[***[HIGH PRIORITY]***
-on login, reconnect, etc, type aflags to check for perm sanc and other effects
-check saf sanc and aflags? ^^
+[[***[HIGH PRIORITY]***
 
---check EQ on login/reconnect, etc. add string for wear/remove sanc aura/boots of speed, etc
+- [x] Add grey SPELL_DOWN icons for all existing icons
 
+- [x] Make time numbers higher than 10 minutes show green, more than 2 minutes show yellow, and under 2 minutes show red.
 
-If sanctuary is ON via some methods, and you wear the sanc aura, leave the timer and when it falls if the aura is on
+- [x] Fix drawing of timers when window is vertically aligned
+
+- [ ] On login, reconnect, etc, type aflags to check for perm sanc and other effects. Check saf sanc and aflags?
+
+- [ ] Get Boots ofo Speed working, here are the strings:
+You remove Aardwolf Boots of Speed from your feet.
+You wear Aardwolf Boots of Speed on your feet.
+
+- [ ] If sanctuary is ON via some methods, and you wear the sanc aura, leave the timer and when it falls if the aura is on
 change timer to PERMA
 
-Get AARD EQ WORKING: here are some strings
-
+- [ ] Get Sanc Aura working, here are the strings:
 Aardwolf Aura of Sanctuary stops floating around you.
 Aardwolf Aura of Sanctuary begins floating around you.
 
-add grey icons of all icons
-add PERMA or infinity timer
-add right click system to set priorities
-add protection good icon
-add protection evil icon
-add sanc aura wear/remove
-add haste boots wear/remove
-handle wraith form
+- [ ] Add PERMA or infinity timer
 
--- [DONE] MAKE NUMBERS SHOW GREEN WHEN OVER 10 MINUTES, YELLOW WHEN UNDER 10, RED WHEN UNDER 2 BLACK WHEN OFF?
+- [ ] Add right click system to set priorities
 
---when logging on use priority system to load grey images of all priorities
+- [ ] Add protection good icon
 
--- [DONE] FIX DRAWING OF TIMERS WHEN VERTICAL DRAWING
+- [ ] Add protection evil icon
 
--- ADD AN ACTUAL FUCKTON MORE AFFECT_ICONS AND ASSIGN TO SPELL NUMBERS    
+- [ ] Handle wraith form
 
-----------------------------------------------------------------------------------------------------------
+- [ ] Add a ton more spells/icons to the affects table
+
+- [ ] When logging on use priority system to load grey images of all priorities
+
 
 ----------------------------------------------------------------------------------------------------------
