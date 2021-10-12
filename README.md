@@ -15,6 +15,7 @@ in the window.
 
 
 ------------------------------------------------TO DO --------------------------------------------------------
+
 --[[***[HIGH PRIORITY]***
 on login, reconnect, etc, type aflags to check for perm sanc and other effects
 check saf sanc and aflags? ^^
