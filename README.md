@@ -3,3 +3,8 @@
 To install this plugin, just paste these folders over your own, and you should be good to go,
 
 or take the files from the folders and place them in your existing folders of the same name.
+
+
+
+There is no "intial check" for spells yet, so once spells fall, and re-up, they will display
+in the window.
