@@ -1,4 +1,5 @@
 # Hello, thanks for your interest in Khadaji's (Asmodeus) Aardwolf Affects Window
+Here is a horrible readme. (I'll improve this later)
 
 To install this plugin, just paste these folders over your own, and you should be good to go,
 
