@@ -17,7 +17,6 @@ in the window.
 
 ------------------------------------------------TO DO --------------------------------------------------------
 
-[[***[HIGH PRIORITY]***
 
 - [x] Add grey SPELL_DOWN icons for all existing icons
 
