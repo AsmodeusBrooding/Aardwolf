@@ -1,6 +1,8 @@
 # Khadaji's Aardwolf Affects Window
 Here is a horrible readme. (I'll improve this later)
 
+![screenshot](https://i.imgur.com/Qcxlwcf.mp4)
+
 To install this plugin, just paste these folders over your own, and you should be good to go,
 
 or take the files from the folders and place them in your existing folders of the same name.
