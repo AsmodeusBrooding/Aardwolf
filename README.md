@@ -19,11 +19,11 @@ in the window.
 
 [[***[HIGH PRIORITY]***
 
-~~- [x] Add grey SPELL_DOWN icons for all existing icons
+~~- [x] Add grey SPELL_DOWN icons for all existing icons~~
 
-~~- [x] Make time numbers higher than 10 minutes show green, more than 2 minutes show yellow, and under 2 minutes show red.
+~~- [x] Make time numbers higher than 10 minutes show green, more than 2 minutes show yellow, and under 2 minutes show red.~~
 
-~~- [x] Fix drawing of timers when window is vertically aligned
+~~- [x] Fix drawing of timers when window is vertically aligned~~
 
 - [ ] On login, reconnect, etc, type aflags to check for perm sanc and other effects. Check saf sanc and aflags?
 
