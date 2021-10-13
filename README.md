@@ -27,7 +27,7 @@ in the window.
 
 - [ ] On login, reconnect, etc, type aflags to check for perm sanc and other effects. Check saf sanc and aflags?
 
-- [ ] Get Boots ofo Speed working, here are the strings:
+- [ ] Get Boots of Speed working, here are the strings:
 You remove Aardwolf Boots of Speed from your feet.
 You wear Aardwolf Boots of Speed on your feet.
 
