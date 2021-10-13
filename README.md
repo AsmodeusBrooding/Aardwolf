@@ -25,6 +25,8 @@ in the window.
 
 - [x] Fix drawing of timers when window is vertically aligned
 
+- [ ] Add icon for NO FORGE, when forge is on cooldown, so you can tell your friends "sorry, i can't forge for XX more minutes"
+
 - [ ] On login, reconnect, etc, type aflags to check for perm sanc and other effects. Check saf sanc and aflags?
 
 - [ ] Get Boots of Speed working, here are the strings:
