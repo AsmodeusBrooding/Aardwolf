@@ -12,6 +12,8 @@ There is no "intial check" for spells yet, so once spells fall, and re-up, they 
 in the window.
 
 
+If affects STILL aren't showing up, make sure you've got TAGS ON, and more specifically,
+SPELLUP tags set to on, and on your next spellup the affects should show up.
 
 
 
