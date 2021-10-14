@@ -18,6 +18,7 @@ in the window.
 
 ------------------------------------------------TO DO --------------------------------------------------------
 
+- [ ] Toggle spellup tags on by default upon startup.
 
 - [x] Add grey SPELL_DOWN icons for all existing icons
 
