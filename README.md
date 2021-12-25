@@ -20,7 +20,7 @@ SPELLUP tags set to on, and on your next spellup the affects should show up.
 
 ------------------------------------------------TO DO --------------------------------------------------------
 
-- [ ] Toggle spellup tags on by default upon startup.
+- [x] Toggle spellup tags on by default upon startup.
 
 - [x] Add grey SPELL_DOWN icons for all existing icons
 
