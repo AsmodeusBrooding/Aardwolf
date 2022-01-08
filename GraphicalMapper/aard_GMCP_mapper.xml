@@ -285,6 +285,22 @@ regexp="n"
 ></alias>
 
 <alias
+match="^mapper show tile( (on|off))?$"
+regexp="y"
+enabled="y"
+sequence="100"
+script="tile_show"
+></alias>
+
+<alias
+match="^mapper show unsafe( (on|off))?$"
+regexp="y"
+enabled="y"
+sequence="100"
+script="unsafe_aylor_toggle"
+></alias>
+
+<alias
 match="^mapper unmapped( .+)?$"
 enabled="y"
 sequence="100"
@@ -872,6 +888,8 @@ local user_terrain_colour = {}
 local performing_maintenance = false
 compact_mode = ((GetVariable("compact_mode") or "0") == "1") -- default false
 OUR_ROOM_COLOUR = tonumber(GetVariable("OUR_ROOM_COLOUR")) or 0x0000FF
+tile_mode = ((GetVariable("tile_mode") or "1") == "1") -- default true
+show_unsafe_aylor = (GetVariable("show_unsafe_aylor") or "0")
 
 room_not_in_database = {}
 room_in_database = {}
@@ -2338,7 +2356,7 @@ function get_room (uid)
    elseif room.info and string.match(room.info, "pk") then
       room.bordercolour = mapper.PK_BORDER_COLOUR.colour
       room.borderpenwidth = 3
-   elseif not (string.match(info, "Safe")) and current_area == "The Grand City of Aylor" then
+   elseif not (string.match(info, "Safe")) and show_unsafe_aylor == "1" and current_area == "The Grand City of Aylor" then
       special_room = true
       room.bordercolour = mapper.PK_BORDER_COLOUR.colour
       room.borderpenwidth = 3
@@ -2372,6 +2390,55 @@ function config_our_room_colour ()
       SaveState()
    end
 end
+
+function tile_toggle()
+   local tile_mode = GetVariable("tile_mode") -- default true
+      if tile_mode == "0" then
+   Execute("mapper show tile on")
+      -- Note("Tile Mode is ON: Graphical tiles will be displayed.")
+   --print("Tile Mode: ", tile_mode)
+   SaveState()
+   mapper.draw(current_room)
+      end
+   if tile_mode == "1" then
+       Execute("mapper show tile off")
+       --  Note("Tile Mode is OFF: Graphical tiles will NOT be displayed.")
+   --print("Tile Mode: ", tile_mode)
+   SaveState()
+   mapper.draw(current_room)
+      end
+   end
+
+   function unsafe_aylor_toggle()
+         if show_unsafe_aylor == "1" then
+      show_unsafe_aylor = "0"
+      SetVariable("show_unsafe_aylor", show_unsafe_aylor)
+      SaveState()
+      mapper.draw(current_room)
+         elseif show_unsafe_aylor == "0" then
+            show_unsafe_aylor = "1" 
+            SetVariable("show_unsafe_aylor", show_unsafe_aylor)
+            SaveState()
+      mapper.draw(current_room)
+         end
+      end
+   
+   function tile_show(name, line, wildcards)
+      if (wildcards[2] ~= "") then
+         tile_mode = (wildcards[2] == "on")
+      end
+      if tile_mode then
+         Note("Tile Mode is ON: Graphical tiles will be displayed.")
+   --print("Tile Mode: ", tile_mode)
+   SaveState()
+   mapper.draw(current_room)
+      else
+         Note("Tile Mode is OFF: Graphical tiles will NOT be displayed.")
+   --print("Tile Mode: ", tile_mode)
+   SaveState()
+   mapper.draw(current_room)
+      end
+   end
 
 function room_delete_note (uid, prev_notes)
    dbCheckExecute(string.format(
@@ -2719,6 +2786,7 @@ function room_click (uid, flags)
    table.insert(handlers, { name = "Edit Terrain Colour", func = room_edit_terrain_colour})
    table.insert(handlers, { name = "-", })
    table.insert(handlers, { name = "Current Room Border Color", func = config_our_room_colour})
+   table.insert(handlers, { name = "Toggle Graphical Tiles", func = tile_toggle})
 
    table.insert(handlers, { name = ">Change Exit Destination", })
    for ex, to in pairs(room.exits) do
@@ -3581,6 +3649,8 @@ SetVariable("quick_mode", quick_mode and "1" or "0")
 SetVariable("shownotes", shownotes and "1" or "0")
 SetVariable("compact_mode", compact_mode and "1" or "0")
 SetVariable("OUR_ROOM_COLOUR", OUR_ROOM_COLOUR) -- Color of Room Border
+SetVariable("tile_mode", tile_mode and "1" or "0")
+SetVariable("show_unsafe_aylor", show_unsafe_aylor)
 
 -- close and reopen database
 if db:isopen() then

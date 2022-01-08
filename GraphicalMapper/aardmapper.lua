@@ -702,18 +702,12 @@ local function draw_room (uid, path, x, y)
    local special_room = false
 	 
 	 
-   -- DRAW MAP IMAGES 
+    -- DRAW MAP IMAGES 
 tile_mode = GetPluginVariable("b6eae87ccedd84f510b74714", "tile_mode") or "1" 
 area = GetPluginVariable("b6eae87ccedd84f510b74714", "current_area") or "<No_Area>" 
                            --  if room.fillcolour and room.fillcolour ~= "" and tile_mode == "1" then
 						   if room.terrain and room.terrain ~= "" and tile_mode == "1" then
-		 
-		 			             if uid == current_room then
-                                         WindowCircleOp (win, miniwin.circle_rectangle, left-2-room.borderpenwidth, top-2-room.borderpenwidth,
-                                         right+2+room.borderpenwidth, bottom+2+room.borderpenwidth, OUR_ROOM_COLOUR.colour,
-                                         room.borderpen, room.borderpenwidth,-2,miniwin.brush_null)	
-										 end
-										 
+		 									 
 		 
    	                         if string.match (room.terrain, "ocean") then
           WindowDrawImage (win, "ocean", left, top, right, bottom, miniwin.image_stretch)  -- stretch to fill
@@ -802,13 +796,14 @@ area = GetPluginVariable("b6eae87ccedd84f510b74714", "current_area") or "<No_Are
      --                                    room.borderpenwidth = 3
 										
 	    -- SPECIAL ROOM COLOUR FILLS
-                         if room.info and room.info ~= "" then
+                         if room.info and room.info ~= ""  then
                          if string.match (room.info, "waypoint") then
                                          special_room = true
 		 	                             WindowDrawImage (win, "waypoint", left, top, right, bottom, miniwin.image_stretch)  -- stretch to fill
 				                         WindowCircleOp (win, miniwin.circle_rectangle, left-2-room.borderpenwidth, top-2-room.borderpenwidth,
                                          right+2+room.borderpenwidth, bottom+2+room.borderpenwidth,WAYPOINT_FILL_COLOUR.colour,
                                          room.borderpen, room.borderpenwidth,-1,miniwin.brush_null)
+                                         print(room.info.details)
 				         elseif string.match (room.info, "shop") then
                                          special_room = true
 		 	                             WindowDrawImage (win, "itemshop", left, top, right, bottom, miniwin.image_stretch)  -- stretch to fill
@@ -881,9 +876,19 @@ area = GetPluginVariable("b6eae87ccedd84f510b74714", "current_area") or "<No_Are
 				                         WindowCircleOp (win, miniwin.circle_rectangle, left-2-room.borderpenwidth, top-2-room.borderpenwidth,
                                          right+2+room.borderpenwidth, bottom+2+room.borderpenwidth,REGULAR_FILL_COLOUR.colour,
                                          room.borderpen, room.borderpenwidth,-1,miniwin.brush_null)
-
                                                     end
                                                    end
+                                                   if uid == current_room then
+                                                      WindowCircleOp (win, miniwin.circle_rectangle, left-2-room.borderpenwidth, top-2-room.borderpenwidth,
+                                                      right+2+room.borderpenwidth, bottom+2+room.borderpenwidth, OUR_ROOM_COLOUR.colour,
+                                                      room.borderpen, room.borderpenwidth,-2,miniwin.brush_null)	
+                                            end
+
+                                                   if uid == current_room and not special_room and tile_mode == "0" then
+                                                      WindowCircleOp (win, miniwin.circle_rectangle, left-2-room.borderpenwidth, top-2-room.borderpenwidth,
+                                                            right+2+room.borderpenwidth, bottom+2+room.borderpenwidth, OUR_ROOM_COLOUR.colour,
+                                                            room.borderpen, room.borderpenwidth,-2,miniwin.brush_null)
+                                                    end
                                                 end
 end -- draw_room
 
