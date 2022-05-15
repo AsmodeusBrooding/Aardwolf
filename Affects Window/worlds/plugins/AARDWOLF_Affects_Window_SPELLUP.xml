@@ -5,7 +5,7 @@
 <muclient>
 <plugin
 name="AARDWOLF_Affects_Window"
-author="Khadaji, Elisius, Tinypotato"
+author="Khadaji, Tinypotato, Hadar"
 id="353de94ba6c43260d839e256"
 save_state="y"
 language="Lua"
