@@ -1,0 +1,2979 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE muclient>
+<!-- Saved on Sunday, July 03 2019 .06-pre -->
+
+<muclient>
+<plugin
+name="AARDWOLF_Affects_Window"
+author="Khadaji, Elisius, Tinypotato"
+id="353de94ba6c43260d839e256"
+save_state="y"
+language="Lua"
+purpose="Affects Window"
+date_written="2019-07-03 12:04:56"
+requires="5.00"
+version="1.0"
+>
+
+</plugin>
+
+<!--  Timers  -->
+
+<timers>
+  <timer
+      script="PlayAllMovieFrames"
+      enabled="y"
+      second="0.1"
+      active_closed="y"
+      >
+
+  </timer>
+</timers>
+
+
+<!--  Aliases  -->
+
+<aliases>
+  <alias
+      regexp="y"
+      match="^affects window$"
+      enabled="y"
+      sequence="100"
+      script="Toggle"
+      >
+  </alias>
+    <alias
+      regexp="y"
+      match="^affects test$"
+      enabled="y"
+      sequence="100"
+	  send_to="12"
+      ><send></send>
+  </alias>
+  <alias
+      regexp="y"
+      match="^affects window debug$"
+      enabled="y"
+      sequence="100"
+      script="ToggleDebug"
+      >
+  </alias>
+  <alias
+      regexp="y"
+      match="^affects window gag prompt"
+      enabled="y"
+      sequence="100"
+      script="TogglePromptGag"
+      >
+  </alias>
+  <alias
+          match="^hsp ?(.*)?"
+          enabled="y"
+          regexp="y"
+          sequence="100"
+          send_to="12"
+          script="HSPmain"
+     >
+     </alias>
+	<alias
+          match="^hsu ?(.*)?"
+          enabled="y"
+          regexp="y"
+          sequence="100"
+          send_to="12"
+          script="HSU"
+     >
+     </alias>
+     
+     <alias match="^had help$"
+          enabled="y"
+          sequence="100"
+          send_to="12"
+          regexp="y"
+          keep_evaluating="y"
+	>
+	<send>
+		HadarHelp()
+	</send>
+	</alias>
+	<alias
+		name="do_vis"
+		match="vis"
+		script="make_vis"
+		enabled="y"
+		sequence="1"
+		ignore_case="y"
+	>
+	</alias>
+</aliases>
+
+<!--  Triggers  -->
+
+<triggers>
+  <trigger
+      enabled="y"
+      match="^(?!You are hungry\.)(((You are )(no longer )?)|(Your ))(?<affect>full|hungry|thirst)( is quenched)?\.$"
+
+      regexp="y"
+      send_to="12"
+      sequence="100"
+      script="RemoveAffect"
+      >
+  </trigger>
+  <trigger
+      enabled="y"
+      match="Your (magical )?(?<affect>charge) (dissipates|wears off)."
+      regexp="y"
+      send_to="12"
+      sequence="100"
+      script="RemoveAffect"
+      >
+  </trigger>
+    <trigger
+      enabled="n"
+      match="^\{affon\}(?P<spell>\d+)\,(?P<duration>\d+)$"
+      regexp="y"
+      send_to="12"
+      sequence="100"
+      script="AddAffectTimed"
+	  keep_evaluating="y"
+      >
+  </trigger>
+      <trigger
+      enabled="y"
+      match="^\{affoff\}(?P<affect>\d+)$"
+      regexp="y"
+      send_to="12"
+      sequence="100"
+      script="RemoveAffect"
+      >
+  </trigger>  
+
+  <trigger
+	name="HSPListStart"
+	group="HSPslistCapture"
+	enabled="n"
+	match="\{spellheaders hsp\}$"
+	regexp="y"
+	omit_from_output="y"
+	sequence="100"
+>
+</trigger>
+<trigger
+	name="HSPListEnd"
+	group="HSPslistCapture"
+	enabled="n"
+	match="^\{\/spellheaders\}$"
+	regexp="y"
+	omit_from_output="y"
+    sequence="100"
+	script="HSP_stop_sList"
+>
+</trigger>
+<trigger
+	name="HSPListCapture"
+    group="HSPslistCapture"
+    enabled="n"
+    match="^(\d+),(.*),(\d+),(\d+),(\d+),([+-]?[0-9,]+),(\d+)$"
+    regexp="y"
+    omit_from_output="y"
+    sequence="100"
+    script="SlistUpdate"
+>
+</trigger>
+<trigger
+	name="HSPRecoveriesStart"
+	enabled="n"
+	match="^\{recoveries hsp\}$"
+	regexp="y"
+	omit_from_output="y"
+	sequence="100"
+	send_to="12"
+>
+<send>
+	EnableTrigger("HSPRecoveriesStart", false)
+	EnableTrigger("HSPRecoveriesCapture", true)
+	EnableTrigger("HSPRecoveriesEnd", true)
+</send>
+</trigger>
+<trigger
+	name="HSPRecoveriesCapture"
+	enabled="n"
+	match="^[0-9]+,[^,]+,[0-9]+$"
+	regexp="y"
+	omit_from_output="y"
+	sequence="100"
+>
+</trigger>
+<trigger
+	name="HSPRecoveriesEnd"
+	enabled="n"
+	match="^\{\/recoveries\}$"
+	regexp="y"
+	omit_from_output="y"
+	sequence="100"
+	send_to="12"
+>
+<send>
+	EnableTrigger("HSPRecoveriesStart", false)
+	EnableTrigger("HSPRecoveriesCapture", false)
+     EnableTrigger("HSPRecoveriesEnd", false)
+</send>
+</trigger>
+
+<trigger
+     name="sfail"
+     group="SpellupTags"
+     enabled="y"
+     match="^\{sfail\}(?<sn>(-|)[0-9]{1,3})\,(?<tg>[0-9]{1,3})\,(?<fl>[0-9]{1,3})\,(?<rc>(-|)[0-9]{1,3})"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+     script="sfail"
+	 send_to="12"
+>
+</trigger>
+<trigger
+     name="affoff"
+     group="SpellupTags"
+     enabled="y"
+     match="^\{affoff\}(?<sn>[0-9]{1,3})"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+     script="affoff"
+>
+</trigger>
+<trigger
+     name="affon"
+     group="SpellupTags"
+     enabled="y"
+     match="^\{affon\}(?<sn>[0-9]{1,3}),(?<time>[0-9]{1,5})"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+	 send_to="12"
+     script="AddAffectTimed"
+	 keep_evaluating="y"
+>
+</trigger>
+<trigger
+     name="invmontag"
+     enabled="y"
+     match="^\{invmon\}(?<action>[0-9]{1,2}),(?<id>[0-9]+),\-?[0-9]+,(?<loc>(-|)[0-9]+)"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+     script="invmon"
+>
+</trigger>
+<trigger
+     name="invitem"
+     enabled="y"
+     match="^\{invitem\}.*"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+>
+</trigger>
+<trigger
+     name="recon"
+     enabled="y"
+     match="^\{recon\}(?<sn>[0-9]{1,2})\,(?<timer>[0-9]{1,4})$"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+	script="recon"
+>
+</trigger>
+<trigger
+     name="recoff"
+     enabled="y"
+     match="^\{recoff\}(?<sn>[0-9]{1,2})$"
+     regexp="y"
+     omit_from_output="y"
+     sequence="100"
+	script="recoff"
+>
+</trigger>
+<trigger
+   enabled="y"
+   match="^\{skillgain\}(?<sn>[0-9]{1,3})\,(?<perc>[0-9]{1,3})$"
+   omit_from_output="y"
+   regexp="y"
+   script="hspskillgain"
+   sequence="100"
+  >
+  </trigger>
+  <trigger
+  enabled="y"
+  match="############# Reconnecting to Game #############"
+  omit_from_output="n"
+  regexp="y"
+  sequence="100"
+  send_to="12"
+ ><send>util.print("@x238Reconnecting...Rebuilding affects...DONE!")
+ OnPluginEnable()</send>
+ </trigger>
+</triggers>
+
+<!--  Script  -->
+
+<script>
+  <![CDATA[
+	require "movewindow"
+	require "mw"
+	require "mw_theme_base"
+	require "tprint"
+	require "utility"
+	dofile(GetInfo(60).."telnet_options.lua"); TelnetOptionOn(TELOPT_SPELLUP)
+	require "serialize"
+require "gmcphelper"
+dofile(GetInfo(60) .. "aardwolf_colors.lua")
+--dofile(GetInfo(60).."telnet_options.lua")
+TelnetOptionOn(TELOPT_SPELLUP) -- fiendish recommends this way to enable the spellup tags silently
+TelnetOptionOn(20)
+TelnetOptionOn(TELOPT_SKILLGAINS)
+local currentState = -1 -- uninitialized
+local maxmana = -1 -- uninitialized
+local currentmana = -1 -- uninitialized
+local slistCommandSent = false
+local pluscount = 0
+local pluscount2 = 0
+local utfset = false
+
+local ascii_2_utf8 = {
+	["7C"]="E29482", -- │
+	["2D"]="E29480", -- ─
+	["0F"]="E2948C", -- ┌
+	["1F"]="E29490", -- ┐
+	["5F"]="E29498", -- ┘
+	["4F"]="E29494", -- └
+	["3F"]="E294A4", -- ┤
+	["2F"]="E2949C", -- ├
+	["5D"]="E2949C", -- ├
+	["5B"]="E294A4" -- ┤
+	}
+local ascii_2_utf82 = {
+		["7C"]="E29482", -- │
+		["2D"]="E29480", -- ─
+		["0F"]="E2948C", -- ┌
+		["1F"]="E29490", -- ┐
+		["3F"]="E29498", -- ┘
+		["2F"]="E29494", -- └
+		}
+
+--[[
+
+Special thanks to:
+Khadaji, assisted in adding in some functions
+scars, tester
+ladydragon, tester
+Saori, tester
+
+
+TODO:
+
+
+]]
+
+	-- Miniwindow State
+	local winid = "win_"..GetPluginID()
+	local version = "1.00"
+	local hiddenWindow = winid.."text_background_offscreen"
+	local bg_color = "#000000"
+	local title_bg_color = "#303030"
+	local border_color = "#303030"
+	local title_color = "#FFFFFF" -- window title color
+	local last_refresh = 1 -- last window refresh
+	local pos_x = GetVariable("pos_x") or 100
+	local pos_y = GetVariable("pos_y") or 100
+	local font_size = 8
+	local font_name = "Lucida Console"
+	local window_visible = true -- always start out with visible window
+	local title = "Affects Window"
+	local win_height = tonumber(GetVariable("win_height")) or 400
+	local win_width = tonumber(GetVariable("win_width")) or 440
+	local grip_resize = 10 -- resize grip size
+	local timer_color = Theme.BODY_TEXT
+    -- the width and height of each image
+    local image_size = GetVariable("image_size") or 32
+	local bad_affect = false
+    
+    -- How tall each row of text is (for the timers)
+    local text_height = 20
+    -- The space between the icon and the text
+    local text_margin_top = 2
+	COOLDOWN_TEXT_COLOUR = ColourNameToRGB "yellow"
+	tick_prefix = "This is a huge test:"
+	current_time = ""
+
+     -- When each spell will run out
+    end_times = {}
+
+	-- Global Vars
+	infos = {}
+	affects = {}
+	warned_about_missing_files = false
+	-- In game name to filename map
+
+	affect_icons = {
+	   ["58"] = "invis",
+	   ["526"] = "elementalfocus",
+	   ["71"] = "nayrus_love",
+	   ["180"] = "nayrus_love",
+	   ["6"] = "blind",
+	   ["29"] = "curse",
+	   ["74"] = "sleep",
+	   ["53"] = "haste",
+	   ["180"] = "haste",
+	   ["237"] = "web",
+	   ["hungry"] = "hungry",
+	   ["thirsty"] = "thirsty"}
+
+    -- We are using this as a set, these affects should be removed from the window
+    -- and not draw a disabled state
+    bad_affects = {
+       ["6"] = "blind",
+	   ["29"] = "curse",
+	   ["237"] = "web",
+	   ["74"] = "sleep"
+    }
+
+	path_prefix = "worlds\\plugins\\images\\affects\\"
+    debug = GetVariable("debug") or false
+    prompt_gag = GetVariable("prompt_gag") or false
+    pulse_length = 1
+
+
+function hadarprint(str,level)
+
+	if level == "debug" then
+		if Spellups["GL"]["Debug"] == "yes" then
+			AnsiNote(ColoursToANSI("@G[@YHSP DEBUG@G]@W:@w"..str))
+		end
+	elseif level == "error" then
+          AnsiNote(ColoursToANSI("@R[@Mhsp @rERROR@R]@W:@w"..str))
+     elseif level == "script" then
+		if type(str) == "table" then
+			tprint(str)
+		else
+			AnsiNote(ColoursToANSI("@G[@CS@cpellup@G]@c "..str))
+		end
+	elseif level == "helpfile" then
+		if utfset then
+			text = utils.tohex(str)
+			if string.find(text,"2B") ~= nil then
+				text = text:gsub('2B', 
+					function(x) 
+						c = pluscount.."F"
+						if pluscount == 5 then
+							pluscount = 0
+						else
+							pluscount = pluscount + 1
+						end
+						return ascii_2_utf8[c]
+					end)
+			end
+			text = string.gsub(text, ("(%x%x)"), ascii_2_utf82)
+			AnsiNote(ColoursToANSI(utils.fromhex(text)))
+		else
+			AnsiNote(ColoursToANSI(str))
+		end
+	elseif level == "helpfile2" then
+		if utfset then
+			text = utils.tohex(str)
+			if string.find(text,"2B") ~= nil then
+				text = text:gsub('2B', 
+					function(x) 
+						c = pluscount2.."F"
+						if pluscount2 == 3 then
+							pluscount2 = 0
+						else
+							pluscount2 = pluscount2 + 1
+						end
+						return ascii_2_utf82[c]
+					end)
+			end
+			text = string.gsub(text, ("(%x%x)"), ascii_2_utf8)
+			AnsiNote(ColoursToANSI(utils.fromhex(text)))
+		else
+			AnsiNote(ColoursToANSI(str))
+		end
+	elseif level == "noclan" then
+		AnsiNote(ColoursToANSI("@G[@x214hsp @YNO CLAN@G]@W:@w"..str))
+	else
+		AnsiNote(ColoursToANSI(str))
+	end
+	
+end
+
+function interp(s, tab)
+	if s == nil then
+		hadarprint("@RYou forgot to fill in a message please use @Chsp help@R and run the message commands to see which one.")
+	else
+		return (s:gsub('($%b{})', function(w) return tab[w:sub(3, -2)] or w end))
+	end
+end
+
+function OnPluginBroadcast(msg, id, name, text)
+	if id == "3e7dedbe37e44942dd46d264" then -- message from the GMCP Handler
+		if (text == "char.status") then
+
+               res, gmcparg = CallPlugin("3e7dedbe37e44942dd46d264","gmcpval","char")
+               luastmt = "gmcpdata = " .. gmcparg
+               assert (loadstring (luastmt or "")) ()
+               currentState = tonumber(gmcpval("status.state"))
+			
+			if currentState == 3 and Spellups["GL"]["autoaura"] == "yes" and Spellups["GL"]["autoaurafired"] == "no" then
+				hadarprint("Should be wearing eqipment "..Spellups["GL"]["float"],"debug")
+				Spellups["GL"]["autoaurafired"] = "yes"
+				SendNoEcho("wear "..Spellups["GL"]["float"])
+				Spellups["GL"]["sancoff"] = "no"
+				if Spellups["GL"]["aurabag"] ~= 0 then
+					SendNoEcho("put "..Spellups["GL"]["auranumber"].." "..Spellups["GL"]["aurabag"])
+				end
+			end		
+			cast_spells()
+			SendSlistCommand()
+		end	
+		if (text == "char.vitals") then
+			res, gmcparg = CallPlugin("3e7dedbe37e44942dd46d264","gmcpval","char")
+            luastmt = "gmcpdata = " .. gmcparg
+            assert (loadstring (luastmt or "")) ()
+			
+			currentmana = tonumber(gmcpval("vitals.mana"))
+			if type(currentmana) ~= "number" then
+				currentmana = nil
+			end
+		end
+		if (text == "char.maxstats") then
+			res, gmcparg = CallPlugin("3e7dedbe37e44942dd46d264","gmcpval","char")
+            luastmt = "gmcpdata = " .. gmcparg
+            assert (loadstring (luastmt or "")) ()
+			
+			maxmana = tonumber(gmcpval("maxstats.maxmana"))
+			if maxmana == nil or maxmana == -1 then
+				Spellups["EX"]["percentageStop"] = 0
+			else
+				Spellups["EX"]["percentageStop"] = (maxmana*Spellups["EX"]["percentage"]/100)
+			end
+		end
+	end --end if char status
+end
+
+function buildInitial()
+	Spellups["AS"]["spellup"] = {}
+	Spellups["AS"]["other"] = {}
+	Spellups["AS"]["recovery"] = {}
+	Spellups["AS"]["attack"] = {}
+	Spellups["AS"]["spells"] = {}
+	Spellups["AS"]["skills"] = {}
+	Spellups["AS"]["list"] = {}
+	Spellups["AS"]["namelist"] = {}
+	Spellups["AF"]["list"] = {}
+	Spellups["EX"]["exceptions"] = { 
+	[1] = 53,
+	[2] = 211,
+	[3] = 258,
+	[4] = 259,
+	[5] = 335,
+	[6] = 526,
+	[7] = 530
+	}
+	Spellups["EX"]["noAuto"] = {}
+    Spellups["AS"]["cSkills"] = {
+    ["twinlobe"] = 468,
+    ["watchmen"] = 483,
+    ["seekers"] =  489,
+    ["emerald"] =  492,
+    ["light"] = 463,
+    ["baal"] = 466,
+    ["hook"] = 470,
+    ["bard"] = 505,
+    ["crusader"] = 488,
+    ["xunti"] = 498,
+    ["imperium"] = 479,
+    ["crimson"] = 471,
+    ["retribution"] = 480,
+    ["druid"] = 475,
+    ["amazon"] = 490,
+    ["pyre"] = 485,
+    ["masaki"] = 481,
+    ["rhabdo"] = 524,
+    ["perdition"] = 497,
+    ["loqui"] = 510,
+    ["gaardian"] = 509,
+    ["tao"] = 499,
+    ["touchstone"] = 496,
+    ["boot"] = 606
+    }
+end
+
+function checkExist(tbl, idx, val) 
+
+     if not Spellups[tbl] then
+          Spellups[tbl] = {}
+     end
+
+     if not Spellups[tbl][idx] then
+               Spellups[tbl][idx] = val
+               SetVariable("Spellups", serialize.save("Spellups")) 
+     end
+     
+end
+
+function injectVars()
+	local v = {}
+	v["GL"] = {} --global
+	v["AS"] = {} --all spells
+	v["AF"] = {} --affected by
+	v["NA"] = {} --not affected by
+	v["QU"] = {} --spellup queue
+	v["EX"] = {} --exceptions
+	v["QS"] = {} --queued spells
+	v["RT"] = {} --recovery
+	v["MS"] = {} --messages
+	v["CG"] = {} --configs (mainly for special cases)
+
+	v["AS"]["namelist"] = {}
+     
+    v["GL"]["initilized"] = "no"
+	v["GL"]["Debug"] = "no"
+	v["GL"]["autoaura"] = "no"
+	v["GL"]["smartcast"] = "no" --todo item
+	v["GL"]["logo"] = "@G[@CS@cpell@CU@cps@G]@w"
+	v["GL"]["disabled"] = "no"
+	v["GL"]["exceptions"] = "yes"
+	v["GL"]["clan"] = "none"
+	v["GL"]["aurabag"] = 0
+	v["GL"]["auranumber"] = 0
+	v["GL"]["autoaurafired"] = "no"
+	v["GL"]["float"] = "none"
+	v["GL"]["sancoff"] = "no"
+	v["GL"]["mainWindow"] = "yes"
+	v["GL"]["commLog"] = "no"
+	v["GL"]["commLogTab"] = nil
+	v["GL"]["thirtytimer"] = "yes"
+	v["GL"]["tentimer"] = "yes"
+	v["GL"]["seespells"] = "yes"
+
+	v["EX"]["clanskill"] = "none"
+	v["EX"]["clanskillV1"] = -1
+	v["EX"]["Timer"] = {}
+	v["EX"]["thirtytimer"] = {}
+	v["EX"]["tentimer"] = {}
+	v["EX"]["wraithform"] = {}
+	v["EX"]["cooldown"] = {}
+	v["EX"]["percentage"] = 0
+	v["EX"]["percentageStop"] = 0
+	
+	v["RT"]["reverse"] = {}
+	v["RT"]["allrecoveries"] = {}
+	v["RT"]["affectedrecovery"] = {}
+	
+	
+	
+	v["MS"]["logo"] = "@G[@CS@cpellup@G]@c"
+	v["MS"]["thirty"] = "${logo} ${spell} is going to fall in 30 seconds"
+	v["MS"]["ten"] = "${logo} ${spell} is going to fall in 10 seconds"
+	v["MS"]["channel"] = "echo"
+
+	v["CG"]["elementward"] = 0
+	v["CG"]["elementfocus"] = 0
+	v["CG"]["totemcast"] = 0
+	v["CG"]["gaiasfocus"] = 0
+
+
+     for a,b in pairs(v) do
+          for c,d in pairs(b) do
+               checkExist(a,c,d)
+          end
+     end
+end
+
+function SendSlistCommand()
+	if (slistCommandSent == false) then
+		slistCommandSent = true
+		EnableTriggerGroup("HSPslistCapture", true)
+		EnableTrigger("HSPRecoveriesStart", true)
+		hadarprint("***Getting Skills/Spells","script")
+		SendNoEcho("slist hsp")
+	end
+end
+
+function HSP_stop_sList()
+		EnableTriggerGroup("HSPslistCapture", false)
+		SaveState()
+
+		hadarprint("***Got all skills/spells","script")
+end
+
+function SlistUpdate(name, line, wildcards)
+	local sn = tonumber(wildcards[1]) --skill name
+	local nm = wildcards[2] -- name of skill
+	local tg = tonumber(wildcards[3]) -- target
+	local du = tonumber(wildcards[4]) -- duration
+	local pc = tonumber(wildcards[5]) -- percent praced
+	local rc = tonumber(wildcards[6]) -- recovery
+	local ty = tonumber(wildcards[7]) -- type
+	Spellups["AS"]["list"][sn] = {name = nm,target = tg,duration = du,prac = pc,recovery = rc,type = ty}
+	local nm2 = nm:gsub(" ","_")
+	Spellups["AS"]["namelist"][nm2] = {skillnum = sn}
+	
+    if tg == 2 or tg == 3 then
+        Spellups["AS"]["spellup"][sn] = nm
+    end
+    if tg == 5 then
+        Spellups["AS"]["other"][sn] = nm
+    end
+    if rc ~= -1 and tg == 2 then
+        Spellups["AS"]["recovery"][sn] = nm
+    end
+    if tg == 1 then
+		Spellups["AS"]["attack"][sn] = nm
+    end
+	if sn == 574 then
+		Spellups["AS"]["attack"][sn] = nm
+	end
+	if sn == 285 then
+		Spellups["AS"]["attack"][sn] = nm
+	end
+	
+	
+	if ty == 1 then
+		Spellups["AS"]["spells"][sn] = nm
+	elseif ty == 2 then
+		Spellups["AS"]["skills"][sn] = nm
+	end
+
+	if rc ~= -1 then
+		Spellups["RT"]["allrecoveries"][rc] = {skillnum = sn, name = nm, duration = du, type = ty, target = tg}
+	end
+	if du > 1 then
+		--if(wildcards[1] ~= nil and wildcards[2] ~= nil) then
+			DebugNote("Spell: " .. wildcards[1])
+			DebugNote("Duration: " .. wildcards[2])
+			spell = sn
+			duration = du
+		    local k, v = FindAffectInInfos(spell)
+			spell = string.gsub(spell, " ", "_")
+			print("SPELL: ",spell .. " DURATION: ",duration)
+			print("K: ", k)
+			if (k == -1 and duration > 0 and affect_icons[spell] ~= nil) then
+				print("working")
+				start_time = os.time() + duration
+				DebugNote("Adding New Timed Affect")
+				PlaceNewGIF(path_prefix .. affect_icons[spell], nil, start_time, true)
+				hours, minutes, seconds = GetTimerTime(duration)
+				DebugNote(string.format("%02d:%02d:%02d", hours, minutes, seconds))
+				DebugNote("timer retval: " .. AddTimer(spell, hours, minutes, seconds, "", timer_flag.Enabled + timer_flag.OneShot, "RemoveAffectTimed"))
+				DebugNote("timer: " .. GetTimer(spell))
+				--tprint(infos)
+				DebugNote(infos.x)
+				--  local i, v = FindAffectInInfos(spell)
+				--  tprint(FindAffectInInfos(spell)[1])
+			 elseif (duration > 0 and affect_icons[spell] ~= nil) then
+			   v.enabled = true
+			   v.start_time = os.time() + duration
+			 end -- if
+	--	end -- if
+	hadarprint("SN:"..sn..", NM:"..nm..", TG:"..tg..", DU:"..du..", PC:"..pc..", RC:"..rc..", TY:"..ty,"debug")
+	end
+	if rc ~= -1 and pc > 1 then
+		hadarprint("SN:"..sn..", NM:"..nm..", TG:"..tg..", DU:"..du..", PC:"..pc..", RC:"..rc..", TY:"..ty,"debug")
+		Spellups["RT"][rc] = {skillnum = sn, name = nm, duration = du, type = ty, target = tg}
+		Spellups["RT"]["reverse"][sn] = {recovery = rc}
+		
+		
+		if GetVariable ("pastfirstinstall") == "false" then
+			table.insert(Spellups["EX"]["Timer"], sn)
+			Spellups["EX"]["thirtytimer"][sn] = "yes"
+			Spellups["EX"]["tentimer"][sn] = "yes"
+		end
+	end
+		
+end--end update
+----------------------------------------------------------------------------------------------------
+--										 End Standard Template	 				   --
+--																			   --
+--								         Start Main Stuff			          	   --
+----------------------------------------------------------------------------------------------------
+
+function HSPmain(name, line, wildcards)
+
+     local first, rest = wildcards[1]:match("(%w+)%s*(.*)")
+     
+     if first == nil then
+          HadarHelp()
+          return
+     end
+     
+     first = string.lower(first)
+     
+	if first == "varshow" then
+		testshow(rest)
+	elseif first == "debug" then
+		setdebug()
+	elseif first == "disable" then
+		HSPDisable(rest)
+	elseif first == "noauto" then
+		noAutoList(rest)
+	elseif first == "reload" then
+		HSPreload()
+	elseif first == "autoaura" then
+		autoaura(rest)
+	elseif first == "channel" then
+		hspSetChannel(rest)
+	elseif first == "set" then
+		hspSet(rest)
+	elseif first == "report" then
+		hspWindow(rest)
+	elseif first == "seespells" or first == "seespell" then
+		hspToggleSeeSpells()
+	elseif first == "totem" then
+		hspsettotem(rest)
+	elseif first == "elementalfocus" then
+		hspsetelementalfocus(rest)
+	elseif first == "elementalward" then
+		hspsetelementalward(rest)
+	elseif first == "combat" then
+		hspsetcombat(rest)
+	elseif first == "timer" then
+		hspdotimerexception(rest)
+	elseif first == "fullspellupreset" then
+		SetVariable ("pastfirstinstall", "false")
+		slistCommandSent = false
+		OnPluginEnable ()
+	elseif first == "wraith" then
+		hspsetwraith(rest)
+	elseif first == "gaiasfocus" then
+		hspsetgaiasfocus(rest)
+	elseif first == "help" then
+		HadarHelp(rest)
+	elseif first == "percent" then
+		hspsetpercent(rest)
+	elseif first == "cskill" then
+		hspshowcskill(rest)
+	else
+		HadarHelp("nadda")
+	end
+
+end
+
+function HSU(name, line, wildcards)
+	local target = wildcards[1]
+end
+
+function setdebug()
+	if Spellups["GL"]["Debug"] == "yes" then
+		Spellups["GL"]["Debug"] = "no"
+		hadarprint("Debug set to @ROFF@w","script")
+	elseif Spellups["GL"]["Debug"] == "no" then
+		Spellups["GL"]["Debug"] = "yes"
+		hadarprint("Debug set to @GON@w","script")
+	end
+end
+
+function testshow(arg)
+    tprint(Spellups["AS"]["attack"])
+	--tprint(Spellups["RT"]["reverse"])
+	--Note(IsTimer("warn_30_"..arg))
+	--Note(IsTimer("warn_10_"..arg))
+end
+
+function invmon(nm,ln,wildcards)
+	if tonumber(wildcards.action) == 1 and tonumber(wildcards.loc) == 27 then
+		if tonumber(Spellups["GL"]["auranumber"]) ~= tonumber(wildcards.id) then
+			Spellups["GL"]["float"] = tonumber(wildcards.id)
+		end
+	end
+end
+
+function affon(name, line, wildcards)
+	local sn = tonumber(wildcards.sn) --skill number
+	local tm = tonumber(wildcards.time) --time affected
+	
+	if Spellups["GL"]["disabled"] == "yes" then
+		return
+	end
+	
+	if contains(Spellups["EX"]["Timer"],sn) then
+		hadarprint("fired on lookup for timer","debug")
+		recoveryup(sn,tm)
+	end
+	
+	
+	Spellups["AF"]["list"][sn] = tm
+	Spellups["NA"][sn] = 1
+	
+	hadarprint("Affected by:"..Spellups["AS"]["list"][sn]["name"].." Time:"..tm,"debug")
+	Spellups["QS"][sn] = nil
+	
+end
+
+function affoff(name,line,wildcards)
+	local sn = tonumber(wildcards.sn)
+	local wraithcastable = false
+	local wraithcounted = 0
+
+	Spellups["AF"]["list"][sn] = nil
+	
+	if Spellups["GL"]["disabled"] == "yes" then
+		return
+	end
+
+	if sn == 121 then
+		Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+	end
+
+	if sn == 180 then
+		for i,v in pairs(Spellups["EX"]["wraithform"]) do
+
+			if table.find(v,Spellups["AF"]["list"]) then
+				--left empty becaue
+			else
+				local ctype = tonumber(Spellups["AS"]["list"][v]["type"])
+				Spellups["QS"][v] = Spellups["AS"]["list"][v]["name"]
+				cast_spells()
+			end
+
+		end--end for loop
+	end
+
+	if sn == 552 then
+		if table.find(518,Spellups["AF"]["list"]) then
+			--left empty becaue
+		else
+			local ctypefocus = tonumber(Spellups["AS"]["list"][552]["type"])
+			local ctyperevenge = tonumber(Spellups["AS"]["list"][518]["type"])
+			if currentState == 8 then
+				Spellups["QS"][552] = Spellups["AS"]["list"][552]["name"]
+				Spellups["QS"][518] = Spellups["AS"]["list"][518]["name"]
+			else
+				cast_this(552,ctypefocus)
+				cast_this(518,ctyperevenge)
+			end
+		end
+	end
+
+	if sn == 518 then
+		Spellups["AF"]["list"][sn] = tm
+		if table.find(552,Spellups["AF"]["list"]) then
+			--left empty becaue
+		else
+			local ctypefocus = tonumber(Spellups["AS"]["list"][552]["type"])
+			local ctyperevenge = tonumber(Spellups["AS"]["list"][518]["type"])
+			if currentState == 8 then
+				Spellups["QS"][552] = Spellups["AS"]["list"][552]["name"]
+				Spellups["QS"][518] = Spellups["AS"]["list"][518]["name"]
+			else
+				cast_this(552,ctypefocus)
+				cast_this(518,ctyperevenge)
+			end
+		end
+	end
+
+	if table.find(Spellups["AS"]["list"][sn]["recovery"],Spellups["RT"]["affectedrecovery"]) ~= nil then
+		hadarprint("affected by recovery:"..Spellups["AS"]["list"][sn]["name"].." not recasting","debug")
+		return
+	end
+	
+	if Spellups["AS"]["list"][sn]["target"] == 2 or Spellups["AS"]["list"][sn]["target"] == 3 or sn == Spellups["EX"]["clanskill"] or sn == Spellups["EX"]["clanskillV1"] then
+		if currentState == 8 then
+			if sn == 71 or sn == 102 or sn == 180 then
+				if sn == 71 or sn == 102 then
+					Spellups["GL"]["sancoff"] = "yes"
+					hadarprint("sancoff = yes","debug")
+					if Spellups["GL"]["autoaura"] == "yes" then
+						affoffautoaura()
+					end
+					Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+				end
+				hadarprint("CS = 8, autoaura = on, sn = 71 or 108 or 180","debug")
+				if sn == 180 then
+					Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+				end
+				return
+			end
+		end
+		Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+		hadarprint("adding to queue (affoff): "..Spellups["AS"]["list"][sn]["name"],"debug")
+	end
+	
+	cast_spells()
+end
+
+function affoffautoaura()
+	if Spellups["GL"]["auranumber"] ~= 0 then
+		hadarprint("autoaura not 0","debug")
+		if Spellups["GL"]["sancoff"] == "yes" then 
+			if Spellups["GL"]["aurabag"] ~= 0 then
+				hadarprint("aurabag not 0","debug")
+				Send("get "..Spellups["GL"]["auranumber"].." "..Spellups["GL"]["aurabag"])
+				Send("wear "..Spellups["GL"]["auranumber"])
+			else
+				hadarprint("aura bag not set leaving in inventory","debug")
+				Send("wear "..Spellups["GL"]["auranumber"])
+			end
+		else
+			if Spellups["GL"]["aurabag"] ~= 0 then
+				hadarprint("aurabag not 0","debug")
+				Send("get "..Spellups["GL"]["auranumber"].." "..Spellups["GL"]["aurabag"])
+				Send("wear "..Spellups["GL"]["auranumber"])
+			else
+				hadarprint("aura bag not set leaving in inventory","debug")
+				Send("wear "..Spellups["GL"]["auranumber"])
+			end
+		end
+		Spellups["GL"]["autoaurafired"] = "no"
+	end
+end
+
+function sfail(name,line,wildcards)
+	--sn == name, tg == target, fl == fail, rc == recovery
+	local sn = tonumber(wildcards.sn) --skill name
+	local tg = wildcards.tg --target
+	local fl = tonumber(wildcards.fl) --failed reason 1  - Regular fail, lost concentration. 2  - Already affected.3  - Cast blocked by a recovery, see below.4  - Not enough mana.5  - You are in a nocast room.6  - Fighting or other "can't concentrate".8  - You don't know the spell.9  - Tried to cast self only on other.10  - You are resting / sitting.11  - Skill/spell has been disabled. 12  - Not enough moves.
+	local rc = tonumber(wildcards.rc) --failed because recovery number
+
+	hadarprint("Spell failed! SN:"..sn..", TG:"..tg..", FL:"..fl,"debug")
+	
+	if Spellups["GL"]["disabled"] == "yes" then
+		return
+	end
+
+	if fl == 4 then
+		Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+	end
+
+    if fl == 3 then 
+        Spellups["QS"][sn] = nil
+        return
+    end
+	
+	if fl == 6 then
+		if Spellups["GL"]["autoaura"] == 1 then
+			--setup auto aura stuff here
+		end
+	end
+	
+	if fl == 1 or fl == 6 then
+		hadarprint("FL 1 or 6!","debug")
+		if sn == 121 then
+			Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+		end
+
+		if table.find(sn,Spellups["AS"]["spellup"]) ~= nil then
+			Spellups["QS"][sn] = Spellups["AS"]["list"][sn]["name"]
+			hadarprint("failed and found in spellup","debug")
+		end
+		cast_spells()
+	end
+end
+
+function cast_spells()
+	if Spellups["GL"]["disabled"] == "yes" then
+		return
+	end
+
+	if currentmana == nil or currentmana == -1 then
+		--left blank to test something
+	elseif Spellups["EX"]["percentageStop"] >= currentmana then
+		return
+	end
+	
+	for i,v in pairs (Spellups["QS"]) do
+        local ctype = tonumber(Spellups["AS"]["list"][i]["type"])
+
+		if Spellups["GL"]["exceptions"] == "yes" and currentState == 8 then
+			if contains(Spellups["EX"]["exceptions"], i) then
+				hadarprint("found exception","debug")
+				cast_this(i,ctype)
+			end
+		elseif currentState == 3 then
+			if contains(Spellups["EX"]["noAuto"],i) == false then
+
+				if sn == 518 then
+					if contains(Spellups["QS"],552) then
+						cast_this(552,Spellups["AS"]["list"][552]["type"])
+						cast_this(518,Spellups["AS"]["list"][518]["type"])
+						break
+					end
+				end
+
+				if Spellups["AS"]["list"][i]["prac"] > 1 or i == Spellups["EX"]["clanskill"] or i == Spellups["EX"]["clanskillV1"] then 
+					cast_this(i,ctype)
+				else
+					Spellups["QS"][i] = nil --if spell not practiced remove from queue
+				end
+			else
+				hadarprint(Spellups["AS"]["list"][i]["name"].." is noauto, removing","debug")
+				Spellups["QS"][i] = nil -- if spell noauto then remove from list
+			end
+		end
+	end
+end
+
+function cast_this(sn,ctype)
+	Spellups["QS"][sn] = nil
+	hadarprint("casting:"..sn,"debug")
+	local castline = nil
+	
+	if sn == 552 then
+		if Spellups["CG"]["gaiasfocus"] == 0 then
+			castline = "cast '"..Spellups["AS"]["list"][sn]["name"]
+		else
+			castline = "cast '"..Spellups["AS"]["list"][sn]["name"].."' "..Spellups["CG"]["gaiasfocus"]
+		end
+	elseif sn == 526 then
+		castline = "cast '"..Spellups["AS"]["list"][sn]["name"].."' "..Spellups["CG"]["elementfocus"]
+	elseif sn == 530 then
+		castline = "cast '"..Spellups["AS"]["list"][sn]["name"].."' "..Spellups["CG"]["elementward"]
+	elseif ctype == 1 then
+		castline = "cast '"..Spellups["AS"]["list"][sn]["name"].."'"
+	elseif sn == 226 and ctype == 2 then
+		castline = "trace"
+	elseif ctype == 2 then
+		local t = utils.split(Spellups["AS"]["list"][sn]["name"]," ",2)
+		castline = t[1]
+	end
+	
+	if castline ~= nil then
+		if Spellups["GL"]["seespells"] == "yes" then
+			Send(castline)
+		else
+			SendNoEcho(castline)
+		end 
+	end
+end
+
+function table.find(val, tbl) 
+	tbl = tbl or {}
+	if (tbl[val] ~= nil) then
+		return tbl[val]
+	end
+	return nil
+end
+
+function table.count(tbl)
+	tbl = tbl or {}
+	local tblcount = 0
+	for i,v in pairs(tbl) do
+		tblcount = tblcount + 1
+	end
+	return tblcount
+end
+
+function HSPDisable(arg)
+	if string.lower(arg) == "silent" then
+		if Spellups["GL"]["disabled"] == "yes" then
+			Spellups["GL"]["disabled"] = "no"
+		elseif Spellups["GL"]["disabled"] == "no" then
+			Spellups["GL"]["disabled"] = "yes"
+		end
+	elseif string.lower(arg) == "check" then
+		if Spellups["GL"]["disabled"] == "yes" then
+			hadarprint("Spellup Autocast is currently @RDISABLED@w","script")
+		elseif Spellups["GL"]["disabled"] == "no" then
+			hadarprint("Spellup Autocast is currently @GENABLED@w","script")
+		end
+	else
+		if Spellups["GL"]["disabled"] == "yes" then
+			Spellups["GL"]["disabled"] = "no"
+			hadarprint("Autocast set to @GON@w","script") -- changed from Spellup because hadarprint already uses [SPELLUP]
+		elseif Spellups["GL"]["disabled"] == "no" then
+			Spellups["GL"]["disabled"] = "yes"
+			hadarprint("Spellup Autocast set to @ROFF@w","script")
+		end
+	end
+end
+
+function autoaura(str)
+	local first, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	
+	local arg = string.lower(first)
+	
+	if arg == "aura" then
+		auraset(rest)
+	elseif arg == "bag" then
+		aurasetbag(rest)
+	elseif arg == "on" then
+		auraseton()
+	elseif arg == "off" then
+		aurasetoff()
+	else
+	end
+end
+
+function auraseton()
+	if Spellups["GL"]["autoaura"] == "no" then
+		if Spellups["GL"]["auranumber"] == 0 then
+			hadarprint("Auto aura @RNOT@c turned on","script")
+			hadarprint("You will need to set an aura number use command @Ghsp autoaura aura <number>@w","error")
+			hadarprint("also if you have not set the bag you can do so with @Ghsp autoaura bag <number>@w","error")
+		else
+			Spellups["GL"]["autoaura"] = "yes"
+			hadarprint("Auto aura set to @GON","script")
+		end
+	else
+		hadarprint("Auto aura already set to on, please use @Ghsp autoaura off","error")
+	end
+end
+
+function aurasetoff()
+	if Spellups["GL"]["autoaura"] == "yes" then
+			Spellups["GL"]["autoaura"] = "no"
+			hadarprint("Auto aura set to @ROFF","script")
+	else
+		hadarprint("Auto aura already set to off, please use @Ghsp autoaura on","error")
+	end
+end
+
+function auraset(arg)
+
+
+	local thing = tonumber(arg) or string.lower(arg)
+	
+	if type(thing) == "number" then
+		Spellups["GL"]["auranumber"] = thing
+		hadarprint("Aura set to: "..Spellups["GL"]["auranumber"],"script")
+		return
+	end
+
+	if thing == nil or thing == "" or thing == " " then
+		HadarBackup = Spellups["GL"]["auranumber"]
+		Spellups["GL"]["auranumber"] = utils.inputbox ("Set your aura of sanctuary number", "Aura sanctuary here", Spellups["GL"]["auranumber"], "Courier", 9,{box_width = 400,box_height = 350,prompt_height = 200,reply_width = 398,reply_height = 40,})
+	
+		if Spellups["GL"]["auranumber"] ~= nil then
+			hadarprint("Aura set to: "..Spellups["GL"]["auranumber"],"script")
+		else
+			Spellups["GL"]["auranumber"] = HadarBackup
+		end
+		return
+	end
+
+end
+
+function aurasetbag(arg)
+	local arg = tonumber(arg) or string.lower(arg)
+	
+	if arg == nil or arg == "" or arg == " " then
+		HadarBackup = Spellups["GL"]["aurabag"]
+		Spellups["GL"]["aurabag"] = utils.inputbox ("Set bag where aura is stored\n use 'none' if in inventory", "Set bag where aura saved", Spellups["GL"]["aurabag"], "Courier", 9,{box_width = 400,box_height = 350,prompt_height = 200,reply_width = 398,reply_height = 40,})
+	
+		if Spellups["GL"]["aurabag"] ~= nil then
+			hadarprint("Aura bag set to: "..Spellups["GL"]["aurabag"],"script")
+		else
+			Spellups["GL"]["aurabag"] = HadarBackup
+		end
+		return
+	end
+	
+	if type(arg) == "number" then
+		Spellups["GL"]["aurabag"] = arg
+		hadarprint("Aura bag set to: "..Spellups["GL"]["aurabag"],"script")
+	end
+end
+
+function contains(tableToSearch, value)
+	for i,v in ipairs(tableToSearch) do
+		if (v == value) then
+			return true
+		end
+	end
+	return false
+  end
+
+  function remove(tableToSearch, value)
+	for i,v in ipairs(tableToSearch) do
+		if (v == value) then
+			   table.remove(tableToSearch, i)
+		   return
+		end
+	end
+  end
+  
+	
+function noAutoList(sn)
+	sn = tonumber(sn) or string.lower(sn)
+	if type(sn) == "number" then
+		if table.find(sn, Spellups["AS"]["list"]) ~= nil then
+  			if contains(Spellups["EX"]["noAuto"], sn) then 
+  				hadarprint("Removing "..Spellups["AS"]["list"][sn]["name"].." from the NOAUTO list","script")
+  				remove(Spellups["EX"]["noAuto"], sn)
+  			else
+				hadarprint("Adding "..Spellups["AS"]["list"][sn]["name"].." to the NOAUTO list","script")	
+  				table.insert(Spellups["EX"]["noAuto"], sn)
+  			end
+		else
+			hadarprint("Please input a valid SN","error")
+		end
+	elseif sn == "clear" then
+		Spellups["EX"]["noAuto"] = {}
+		hadarprint("Your list of no cast spells has been cleared.","script")
+	elseif sn == "show" then
+		hadarprint("@W+@x086--------------@G[@CN@co @CA@cuto @CC@cast @CS@cpells@G]@x086-------------@W+@w")
+		hadarprint("@W|      @CS@cpell @CN@cumber      @W|      @CS@cpell @Cn@came       @W|@w")
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+		if Spellups["EX"]["noAuto"][1] == nil then
+			hadarprint("@W|@c      No Spells are set to not autocast         @W|@w")
+			hadarprint("@W|@c      to set a spell use hsp noauto <number>    @W|@w")
+		end
+		for i ,v in pairs(Spellups["EX"]["noAuto"]) do
+			local numbersize = 24-string.len(v)
+			local numberpad1 = math.ceil(numbersize/2)
+			local numberpad2 = math.floor(numbersize/2)
+			local shownumber = string.rep(" ",numberpad1)..v..string.rep(" ",numberpad2)
+
+			local wordsize = 23-string.len(Spellups["AS"]["list"][tonumber(v)]["name"])
+			local wordpad1 = math.ceil(wordsize/2)
+			local wordpad2 = math.floor(wordsize/2)
+			local showword = string.rep(" ",wordpad1)..Spellups["AS"]["list"][tonumber(v)]["name"]..string.rep(" ",wordpad2)
+			
+			hadarprint("@W|@c"..shownumber.."@W|@c"..showword.."@W|@w")
+		end
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+	else
+		hadarprint("@W+@x086--------------@G[@CN@co @CA@cuto @CC@cast @CS@cpells@G]@x086-------------@W+@w")
+		hadarprint("@W|      @CS@cpell @CN@cumber      @W|      @CS@cpell @Cn@came       @W|@w")
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+		if Spellups["EX"]["noAuto"][1] == nil then
+			hadarprint("@W|@c      No Spells are set to not autocast         @W|@w")
+			hadarprint("@W|@c      to set a spell use hsp noauto <number>    @W|@w")
+		end
+		for i ,v in pairs(Spellups["EX"]["noAuto"]) do
+			local numbersize = 24-string.len(v)
+			local numberpad1 = math.ceil(numbersize/2)
+			local numberpad2 = math.floor(numbersize/2)
+			local shownumber = string.rep(" ",numberpad1)..v..string.rep(" ",numberpad2)
+
+			local wordsize = 23-string.len(Spellups["AS"]["list"][tonumber(v)]["name"])
+			local wordpad1 = math.ceil(wordsize/2)
+			local wordpad2 = math.floor(wordsize/2)
+			local showword = string.rep(" ",wordpad1)..Spellups["AS"]["list"][tonumber(v)]["name"]..string.rep(" ",wordpad2)
+			
+			hadarprint("@W|@c"..shownumber.."@W|@c"..showword.."@W|@w")
+		end
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+	end
+end
+
+function make_vis()
+	hadarprint("Letting you go visible","script")
+	EnableAlias("do_vis", false)
+		
+	if Spellups["GL"]["disabled"] == "yes" then
+		return
+	end
+	
+	Spellups["GL"]["disabled"] = "yes"
+	
+	SendNoEcho("vis")
+	EnableAlias("do_vis", true)
+	
+	DoAfterSpecial(1, "hsp disable silent", 10) -- execute
+end
+
+function HSPreload()
+	hadarprint("Reloading Spellup plugin","script")
+	slistCommandSent = false
+	SendSlistCommand()
+end
+
+function recoveryup(sn,timer)
+	hadarprint("SN:"..sn..", TIMER:"..timer,"debug")
+	
+	local sn = tonumber(sn)
+	local tm = tonumber(timer)
+	local uptime1 = tm - 30
+	local uptime2 = tm - 10
+	
+	local firstwarn = "warn_30_"..sn
+	local secondwarn = "warn_10_"..sn
+	
+	local remaining1 = uptime1 % 86400
+	local hours1 = math.floor(remaining1/3600)
+	remaining1 = remaining1 % 3600
+	local minutes1 = math.floor(remaining1/60)
+	remaining1 = remaining1 % 60
+	local seconds1 = remaining1
+	local remaining2 = uptime2 % 86400
+	local hours2 = math.floor(remaining2/3600)
+	remaining2 = remaining2 % 3600
+	local minutes2 = math.floor(remaining2/60)
+	remaining2 = remaining2 % 60
+	local seconds2 = remaining2
+	
+	hadarprint("1)"..firstwarn..":"..uptime1.." hours:"..hours1..", minutes:"..minutes1..", seconds:"..seconds1,"debug")
+	hadarprint("2)"..secondwarn..":"..uptime2.." hours:"..hours2..", minutes:"..minutes2..", seconds:"..seconds2,"debug")
+	
+	if Spellups["EX"]["thirtytimer"][sn] == "yes" then
+		hadarprint("Added 30 timer for: "..firstwarn,"debug")
+		check(AddTimer (firstwarn, hours1, minutes1, seconds1, "", timer_flag.Enabled+timer_flag.OneShot+timer_flag.Replace, "rcwarning"))
+	end
+
+	if Spellups["EX"]["tentimer"][sn] == "yes" then
+		hadarprint("Added 10 timer for: "..secondwarn,"debug")
+		check(AddTimer (secondwarn, hours2, minutes2, seconds2, "", timer_flag.Enabled+timer_flag.OneShot+timer_flag.Replace, "rcwarning"))
+	end
+end
+
+function recon(n,l,wildcards)
+	local sn = tonumber(wildcards.sn)
+	local tm = tonumber(wildcards.timer)
+	
+	Spellups["RT"]["affectedrecovery"][sn] = tm
+	hadarprint("Recovery on:"..Spellups["RT"][sn]["name"].." For:"..tm,"debug")
+end
+
+function recoff(n,l,wildcards)
+	local sn = tonumber(wildcards.sn)
+	local skillnum = Spellups["RT"][sn]["skillnum"]
+	local skilltype = Spellups["RT"][sn]["type"]
+	local skillname = Spellups["RT"][sn]["name"]
+	Spellups["RT"]["affectedrecovery"][sn] = nil
+
+	if sn == 16 then
+		if Spellups["CG"]["totemcast"] == "force" then
+			if Spellups["GL"]["seespells"] == "yes" then
+				Send("cast 'totem force'")
+			else
+				SendNoEcho("cast 'totem force'")
+			end --end seespell check
+		elseif Spellups["CG"]["totemcast"] == "guidance" then
+			if Spellups["GL"]["seespells"] == "yes" then
+				Send("cast 'totem guidance'")
+			else
+				SendNoEcho("cast 'totem guidance'")
+			end --end seespell check
+		else
+			hadarprint("Autocasting totem guidance or totem focus not set")
+		end
+	else
+		if table.find(skillnum,Spellups["AS"]["attack"]) == nil then
+			hadarprint("recasting:"..skillname,"debug")
+
+			Spellups["QS"][skillnum] = Spellups["AS"]["list"][skillnum]["name"]
+			hadarprint("adding to queue (recovery off): "..Spellups["AS"]["list"][skillnum]["name"],"debug")
+			
+			cast_spells()
+		end
+	end --end elemental focus recoverynumber
+						
+end
+
+function rcwarning(arg)
+	local t = utils.split(arg,"_")
+	local nm = Spellups["AS"]["list"][tonumber(t[3])]["name"]
+	local message
+
+	hadarprint("1:"..t[1].." 2:"..t[2].." 3:"..t[3].." nm:"..nm,"debug")
+	
+	if t[2] == "30" then
+		message = interp(Spellups["MS"]["thirty"], {logo = Spellups["MS"]["logo"], spell = nm})
+	elseif t[2] == "10" then
+		message = interp(Spellups["MS"]["ten"], {logo = Spellups["MS"]["logo"], spell = nm})
+	else
+		message = "danger will robinson i dont know how i got here!"
+	end
+
+
+	if message ~= nil then
+          
+		if Spellups["GL"]["mainWindow"] == "yes" then
+			 if Spellups["MS"]["channel"] == "echo" or Spellups["MS"]["channel"] == "print" then
+				  hadarprint(message)
+			 else
+				  SendSpecial(Spellups["MS"]["channel"] .. " " ..message)
+			 end
+		end
+		
+		if Spellups["GL"]["commLog"] == "yes" then
+			 CallPlugin("b555825a4a5700c35fa80780","storeFromOutside",message, Spellups["GL"]["commLogTab"], "yes")
+		end
+		
+		if Spellups["GL"]["commLog"] == "no" and Spellups["GL"]["mainWindow"] == "no" then
+			 hadarprint("You have both reporting to Comm log and reporting to main window off, cant report","error")
+		end
+		
+   end
+end
+
+function hspSet(param)
+	param = string.lower(param)
+	if param == "30" then
+		HadarBackup = Spellups["MS"]["thirty"]
+		Spellups["MS"]["thirty"] = utils.inputbox ("${logo} - Shows the logo of the script\n${spell} - shows the name of the spell", "look of thirty seconds until spell expires", Spellups["MS"]["thirty"], "Courier", 9)
+	   
+		if Spellups["MS"]["thirty"] ~= nil then
+			hadarprint("30 seconds left will look like@W: @w"..Spellups["MS"]["thirty"],"script")
+		else
+			Spellups["MS"]["thirty"] = HadarBackup
+		end
+	elseif param == "10" then
+		HadarBackup = Spellups["MS"]["ten"]
+		Spellups["MS"]["ten"] = utils.inputbox ("${logo} - Shows the logo of the script\n${spell} - shows the name of the spell", "look of ten seconds until spell expires", Spellups["MS"]["ten"], "Courier", 9)
+	   
+		if Spellups["MS"]["ten"] ~= nil then
+			hadarprint("10 seconds left will look like@W: @w"..Spellups["MS"]["ten"],"script")
+		else
+			Spellups["MS"]["ten"] = HadarBackup
+		end
+	elseif param == "logo" then
+		HadarBackup = Spellups["MS"]["logo"]
+		Spellups["MS"]["logo"] = utils.inputbox ("how would you like the logo to look?", "look of logo", Spellups["MS"]["logo"], "Courier", 9)
+   
+		if Spellups["MS"]["logo"] ~= nil then
+			hadarprint("the logo will look like@W: @w"..Spellups["MS"]["logo"],"script")
+		else
+			Spellups["MS"]["logo"] = HadarBackup
+		end
+	else
+		hadarprint("@cYou need to input one of the following@w: @Glogo@w, @G30@w,@G 10@w @C.@c.@C. @YEG:@R hsp set 10@w","error")
+	end
+	SaveState()
+end
+
+function hspSetChannel(str)
+	if str ~= nil and str ~= "" and str ~= " " then
+		Spellups["MS"]["channel"] = str
+		hadarprint("Default channel set to@w: @G" .. Spellups["MS"]["channel"],"script")
+   else
+		hadarprint("Current Channel:"..Spellups["MS"]["channel"],script)
+		hadarprint("@cPlease use the following command@W:@Ghsp channel <channel you want to output to>@w","error")
+   end
+	SaveState()
+end
+
+function hspWindow(str)
+	if str == nil or str == "" or str == " " then
+		 hadarprint("@cYou need to give an argument EG: @Ghsp report main","error")
+		 return
+	end
+	
+	local first, second = str:match("(%w+)%s*(.*)")
+	
+	first = string.lower(first)
+	
+	if second == " " or second == "" then
+		 second = nil
+	end
+	  
+
+	if first == "main" and second == nil then
+		if Spellups["GL"]["mainWindow"] == "yes" then
+			  Spellups["GL"]["mainWindow"] = "no"
+			  hadarprint("You will @RNOT @creport spellup info to the main window","script")
+		 else
+			  Spellups["GL"]["mainWindow"] = "yes"
+			  hadarprint("You @GWILL@c report spellup info to the main window","script")
+		 end
+	elseif first == "main" and second == "on" then
+		 Spellups["GL"]["mainWindow"] = "yes"
+		 hadarprint("You @GWILL@c report spellup info to the main window","script")
+	elseif first == "main" and second == "off" then
+		 Spellups["GL"]["mainWindow"] = "no"
+		 hadarprint("You will @RNOT @creport spellup info to the main window","script")
+	elseif first == "comm" and second == nil then
+		 if Spellups["GL"]["commLog"] == "yes" then
+			  Spellups["GL"]["commLog"] = "no"
+			  hadarprint("You will @RNOT @creport spellup info to the comm window","script")
+		 else
+			  Spellups["GL"]["commLog"] = "yes"
+			  hadarprint("You @GWILL@c report spellup info to the comm window","script")
+		 end
+	elseif first == "comm" and second == "on" then
+		 Spellups["GL"]["commLog"] = "yes"
+		 hadarprint("You @GWILL@c report spellup info to the main window","script")
+	elseif first == "comm" and second == "off" then
+		Spellups["GL"]["commLog"] = "no"
+		 hadarprint("You will @RNOT @creport spellup info to the main window","script")
+	end
+	
+	if second ~= nil and second ~= "on" and second ~= "off" then
+		Spellups["GL"]["commLogTab"] = second
+		hadarprint("You will now report spellup info to the @W"..second.."@w communication log","script")
+	end
+	
+	SaveState()
+end
+
+function hspToggleSeeSpells()
+	if Spellups["GL"]["seespells"] == "yes" then
+		Spellups["GL"]["seespells"] = "no"
+		hadarprint("Seeing the recast message @RDISABLED@w","script")
+	else
+		Spellups["GL"]["seespells"] = "yes"
+		hadarprint("Seeing the recast message @GENABLED@w","script")
+	end
+end
+
+function hspsettotem(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = string.lower(arg)
+
+	if arg == "force" then
+		Spellups["CG"]["totemcast"] = "force"
+		hadarprint("When able you will cast @Gtotem force@w","script")
+	elseif arg == "guidance" then
+		Spellups["CG"]["totemcast"] = "guidance"
+		hadarprint("When able you will cast @Gtotem guidance@w","script")
+	else
+		hadarprint("You need to enter which totem you want to cast either @R[@Ghsp totem force@R]@c, or @R[@Ghsp totem guidance@R]@w","script")
+	end
+end
+
+function hspsetelementalfocus(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = string.lower(arg)
+
+	if arg == "earth" or arg == "air" or arg == "fire" or arg == "water" then
+		Spellups["CG"]["elementfocus"] = arg
+		hadarprint("Elemental @rfocus@c set to: @G"..Spellups["CG"]["elementfocus"],"script")
+	else
+		hadarprint("You need to enter which element you want to cast @CEarth@c, @CAir@c, @CFire@c, @CWater @C... @GEG hsp elementalfocus fire@w","script")
+	end
+end
+
+function hspsetelementalward(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = string.lower(arg)
+
+	if arg == "earth" or arg == "air" or arg == "fire" or arg == "water" then
+		Spellups["CG"]["elementward"] = arg
+		hadarprint("Elemental @Cward@c set to: @G"..Spellups["CG"]["elementward"],"script")
+	else
+		hadarprint("You need to enter which element you want to cast @CEarth@c, @CAir@c, @CFire@c, @CWater @C... @GEG hsp elementalward fire@w","script")
+	end
+end
+
+function hspsetgaiasfocus(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = string.lower(arg)
+
+	if arg == "random" or arg == "none" then
+		Spellups["CG"]["gaiasfocus"] = 0
+		hadarprint("Gaia's @Cfocus@c set to: @GRandom","script")
+		return
+	end
+	if arg == "earth" or arg == "air" or arg == "cold" or arg == "water" or arg == "electric" then
+		Spellups["CG"]["gaiasfocus"] = arg
+		hadarprint("Gaia's @Cfocus@c set to: @G"..Spellups["CG"]["gaiasfocus"],"script")
+	else
+		hadarprint("You need to enter which element you want to cast @CEarth@c, @CAir@c, @CCold@c, @CWater@c, @CElectric@c, @CRandom @C... @GEG hsp elementalward fire@w","script")
+	end
+end
+
+function hspskillgain(n,l,wildcards)
+	local sn = tonumber(wildcards.sn)
+	local pc = tonumber(wildcards.perc)
+	
+	
+	Spellups["AS"]["list"][sn]["prac"] = pc
+end
+
+function hspdotimerexception(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+	local nm2
+	
+	if arg ~= nil and arg ~= "" and arg ~= " " and type(arg) == "string" then
+		nm2 = arg:gsub(" ","_")
+	end
+
+
+	if type(arg) == "number" then
+		if table.find(arg, Spellups["AS"]["list"]) ~= nil then
+			if contains(Spellups["EX"]["Timer"], arg) then 
+				hadarprint("Removing "..Spellups["AS"]["list"][arg]["name"].." from the timers list","script")
+				remove(Spellups["EX"]["Timer"], arg)
+				Spellups["EX"]["thirtytimer"][arg] = "no"
+				Spellups["EX"]["tentimer"][arg] = "no"
+			else
+				hadarprint("Adding "..Spellups["AS"]["list"][arg]["name"].." to the timers list, turned on 30 second warning, and 10 second warning","script")	
+				table.insert(Spellups["EX"]["Timer"], arg)
+				Spellups["EX"]["thirtytimer"][arg] = "yes"
+				Spellups["EX"]["tentimer"][arg] = "yes"
+			end
+		else
+			hadarprint("Please enter a valid SN","error")
+		end
+	elseif arg == "set" then
+		addorremovetimers(rest)
+	elseif table.find(nm2,Spellups["AS"]["namelist"]) ~= nil then
+		local sn = tonumber(Spellups["AS"]["namelist"][nm2]["skillnum"])
+
+		if contains(Spellups["EX"]["Timer"], sn) then 
+			hadarprint("Removing "..Spellups["AS"]["list"][sn]["name"].." from the timers list","script")
+			remove(Spellups["EX"]["Timer"], sn)
+			Spellups["EX"]["thirtytimer"][sn] = "no"
+			Spellups["EX"]["tentimer"][sn] = "no"
+		else
+			hadarprint("Adding "..Spellups["AS"]["list"][sn]["name"].." to the timers list, turned on 30 second warning, and 10 second warning","script")	
+			table.insert(Spellups["EX"]["Timer"], sn)
+			Spellups["EX"]["thirtytimer"][sn] = "yes"
+			Spellups["EX"]["tentimer"][sn] = "yes"
+		end
+	else
+		hadarprint("@W+@x086------------------------------@G[@CS@cpell @CT@cimers]------------------------------@W+@w")
+		hadarprint("@W|      @CS@cpell @CN@cumber      @W|      @CS@cpell @Cn@came        @W|     @CA@cctive @CT@cimer@x086'@cs     @W|@w")
+		hadarprint("@W+@x086--------------------------------------------------------------------------@W+@w")
+	
+		if Spellups["EX"]["Timer"][1] == nil then
+			hadarprint("@W|@c     No Spells are set to have a timer        @W|@w")
+		end
+
+		for i ,v in pairs(Spellups["EX"]["Timer"]) do
+			local timerstring1 = nil
+			local timerstring2 = nil
+			local timerstring3
+			local timerstring3nude
+			if Spellups["EX"]["thirtytimer"][v] == "yes" then
+				timerstring1 = "yes"
+			end
+
+			if Spellups["EX"]["tentimer"][v] == "yes" then
+				timerstring2 = "yes"
+			end
+
+			if timerstring1 == nil and timerstring2 == nil then
+				timerstring3 = "@Rnone"
+				timerstring3nude = "none"
+			elseif timerstring1 == "yes" and timerstring2 == nil then
+				timerstring3 = "@G30"
+				timerstring3nude = "30"
+			elseif timerstring1 == nil and timerstring2 == "yes" then
+				timerstring3 = "@g10"
+				timerstring3nude = "10"
+			elseif timerstring1 == "yes" and timerstring2 == "yes" then
+				timerstring3 = "@G30@W,@G10"
+				timerstring3nude = "30,10"
+			end
+
+
+			local numbersize = 24-string.len(v)
+			local numberpad1 = math.ceil(numbersize/2)
+			local numberpad2 = math.floor(numbersize/2)
+			local shownumber = string.rep(" ",numberpad1)..v..string.rep(" ",numberpad2)
+
+			local wordsize = 24-string.len(Spellups["AS"]["list"][tonumber(v)]["name"])
+			local wordpad1 = math.ceil(wordsize/2)
+			local wordpad2 = math.floor(wordsize/2)
+			local showword = string.rep(" ",wordpad1)..Spellups["AS"]["list"][tonumber(v)]["name"]..string.rep(" ",wordpad2)
+
+			local timersize = 24-string.len(timerstring3nude)
+			local timerpad1 = math.ceil(timersize/2)
+			local timerpad2 = math.floor(timersize/2)
+			local showtimer = string.rep(" ",timerpad1)..timerstring3..string.rep(" ",timerpad2)
+			
+			hadarprint("@W|@c"..shownumber.."@W|@c"..showword.."@W|@c"..showtimer.."@W|@w")
+		end
+		hadarprint("@W+@x086--------------------------------------------------------------------------@W+@w")
+		
+	end
+end
+
+function addorremovetimers(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+	rest = tonumber(rest) or string.lower(rest)
+	
+	if type(arg) == "string" then
+		local nm2 = arg:gsub(" ","_")
+		
+		if table.find(nm2,Spellups["AS"]["namelist"]) ~= nil then
+			arg = tonumber(Spellups["AS"]["namelist"][nm2]["skillnum"])
+		else
+			hadarprint("Expected name or SN, Syntax is hsp exception timer set <skill number or name> 10 or hsp exception timer set <skill number or name> 30","script")
+		end
+	end
+	
+	if type(rest) ~= "number" then
+		hadarprint("Expected number, Syntax is hsp exception timer set <skill number> 10 or hsp exception timer set <skill number> 30","script")
+		return
+	end
+
+	if rest == 10 then 
+		if Spellups["EX"]["tentimer"][arg] == "yes" then
+			Spellups["EX"]["tentimer"][arg] = "no"
+			hadarprint("10 second timer @RDISABLED@c for "..Spellups["AS"]["list"][arg]["name"],"script")
+		else
+			Spellups["EX"]["tentimer"][arg] = "yes"
+			hadarprint("10 second timer @GENABLED@c for "..Spellups["AS"]["list"][arg]["name"],"script")
+		end
+	end
+
+	if rest == 30 then 
+		if Spellups["EX"]["thirtytimer"][arg] == "yes" then
+			Spellups["EX"]["thirtytimer"][arg] = "no"
+			hadarprint("30 second timer @RDISABLED@c for "..Spellups["AS"]["list"][arg]["name"],"script")
+		else
+			Spellups["EX"]["thirtytimer"][arg] = "yes"
+			hadarprint("30 second timer @GENABLED@c for "..Spellups["AS"]["list"][arg]["name"],"script")
+		end
+	end
+end
+
+function hspsetcombat(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+	local nm2
+	
+	if arg ~= nil and arg ~= "" and arg ~= " " and type(arg) == "string" then
+		nm2 = arg:gsub(" ","_")
+	end
+
+	if type(arg) == "number" then
+		if table.find(arg, Spellups["AS"]["list"]) ~= nil then
+			if contains(Spellups["EX"]["exceptions"], arg) then 
+				hadarprint("Removing "..Spellups["AS"]["list"][arg]["name"].." from the exceptions list","script")
+				remove(Spellups["EX"]["exceptions"], arg)
+			else
+		  		hadarprint("Adding "..Spellups["AS"]["list"][arg]["name"].." to the exceptions list","script")	
+				table.insert(Spellups["EX"]["exceptions"], arg)
+			end
+		else
+			hadarprint("Please enter a valid SN","error")
+		end
+	elseif table.find(nm2,Spellups["AS"]["namelist"]) ~= nil then
+		local sn = tonumber(Spellups["AS"]["namelist"][nm2]["skillnum"])
+		if contains(Spellups["EX"]["exceptions"], sn) then 
+			hadarprint("Removing "..Spellups["AS"]["list"][sn]["name"].." from the exceptions list","script")
+			remove(Spellups["EX"]["exceptions"], sn)
+		else
+		  hadarprint("Adding "..Spellups["AS"]["list"][sn]["name"].." to the exceptions list","script")	
+			table.insert(Spellups["EX"]["exceptions"], sn)
+		end
+	else
+		hadarprint("@W+@x086---------------@G[@CC@combat @CE@cxceptions@G]@x086--------------@W+@w")
+		hadarprint("@W|      @CS@cpell @CN@cumber      @W|      @CS@cpell @Cn@came       @W|@w")
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+	
+		if Spellups["EX"]["exceptions"][1] == nil then
+			hadarprint("@W|@c     No Spells are set to cat in combat       @W|@w")
+			hadarprint("@W|@c     to set a spell use hsp combat <number>   @W|@w")
+		end
+
+		for i ,v in pairs(Spellups["EX"]["exceptions"]) do
+			local numbersize = 24-string.len(v)
+			local numberpad1 = math.ceil(numbersize/2)
+			local numberpad2 = math.floor(numbersize/2)
+			local shownumber = string.rep(" ",numberpad1)..v..string.rep(" ",numberpad2)
+
+			local wordsize = 23-string.len(Spellups["AS"]["list"][tonumber(v)]["name"])
+			local wordpad1 = math.ceil(wordsize/2)
+			local wordpad2 = math.floor(wordsize/2)
+			local showword = string.rep(" ",wordpad1)..Spellups["AS"]["list"][tonumber(v)]["name"]..string.rep(" ",wordpad2)
+			
+			hadarprint("@W|@c"..shownumber.."@W|@c"..showword.."@W|@w")
+		end
+
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+	end
+end
+
+function hspsetwraith(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+	local nm2
+	
+	if arg ~= nil and arg ~= "" and arg ~= " " and type(arg) == "string" then
+		nm2 = arg:gsub(" ","_")
+	end
+
+	if type(arg) == "number" then
+		if table.find(arg, Spellups["AS"]["list"]) ~= nil then
+			if contains(Spellups["EX"]["wraithform"], arg) then 
+				hadarprint("Removing "..Spellups["AS"]["list"][arg]["name"].." from the wraith form list","script")
+				remove(Spellups["EX"]["wraithform"], arg)
+			else
+	  			hadarprint("Adding "..Spellups["AS"]["list"][arg]["name"].." to the wraith form list","script")	
+				table.insert(Spellups["EX"]["wraithform"], arg)
+			end
+		else
+			hadarprint("Please enter a valid SN","error")
+		end
+	elseif table.find(nm2,Spellups["AS"]["namelist"]) ~= nil then
+		local sn = tonumber(Spellups["AS"]["namelist"][nm2]["skillnum"])
+		if contains(Spellups["EX"]["wraithform"], sn) then 
+			hadarprint("Removing "..Spellups["AS"]["list"][sn]["name"].." from the wraith form list","script")
+			remove(Spellups["EX"]["wraithform"], sn)
+		else
+	  		hadarprint("Adding "..Spellups["AS"]["list"][sn]["name"].." to the wraith form list","script")	
+			table.insert(Spellups["EX"]["wraithform"], sn)
+		end
+	else
+		hadarprint("@W+@x086---------------@G[@CW@craith @CE@cxceptions@G]@x086--------------@W+@w")
+		hadarprint("@W|      @CS@cpell @CN@cumber      @W|      @CS@cpell @Cn@came       @W|@w")
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+
+		if Spellups["EX"]["wraithform"][1] == nil then
+			hadarprint("@W|@c  No Spells are set to cast before wraith form  @W|@w")
+			hadarprint("@W|@c   to set a spell use hsp wraith <number>       @W|@w")
+		end
+
+		for i ,v in pairs(Spellups["EX"]["wraithform"]) do
+			local numbersize = 24-string.len(v)
+			local numberpad1 = math.ceil(numbersize/2)
+			local numberpad2 = math.floor(numbersize/2)
+			local shownumber = string.rep(" ",numberpad1)..v..string.rep(" ",numberpad2)
+
+			local wordsize = 23-string.len(Spellups["AS"]["list"][tonumber(v)]["name"])
+			local wordpad1 = math.ceil(wordsize/2)
+			local wordpad2 = math.floor(wordsize/2)
+			local showword = string.rep(" ",wordpad1)..Spellups["AS"]["list"][tonumber(v)]["name"]..string.rep(" ",wordpad2)
+		
+			hadarprint("@W|@c"..shownumber.."@W|@c"..showword.."@W|@w")
+		end
+
+		hadarprint("@W+@x086------------------------------------------------@W+@w")
+	end
+end
+
+function hspsetpercent(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+
+	if type(arg) == "number" then
+		if maxmana == nil or maxmana == -1 then
+			hadarprint("mana variable not set","error")
+			return
+		end
+		Spellups["EX"]["percentage"] = arg
+		Spellups["EX"]["percentageStop"] = (maxmana*Spellups["EX"]["percentage"]/100)
+		hadarprint("Set autocast pause to @G"..Spellups["EX"]["percentage"].."@c% which is "..Spellups["EX"]["percentageStop"].." mana","script")
+	end
+end
+
+function hspshowcskill(str)
+	local arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+	arg = tonumber(arg) or string.lower(arg)
+
+	if Spellups["GL"]["clan"] == "none" then
+		local grabmessage = {
+			"You know you need to be in a clan to do this! (loner and outcast dont count) *facepalm",
+			"Buuuuut mom, I wish I had a clanskill to see! *ponder",
+			"Can I haz cskill?",
+			"You know, you would have a clan skill if you joined tao! http://aardtao.com",
+			"One day. The day will come, and this command will be useful.",
+			"Teehee, only YOU can see these messages, you know since no clan.",
+			"Honey? 'What?' Where is my Clan Skill? 'What?' Where - IS - MY - CLAN SKILL!",
+			"You know I wish I was funny ... it would make this message that you need a clan skill more interesting.",
+			"What do you call a person without a morgue? clanless!",
+			"You know. if you joined a clan you would not have to put up with these messages.",
+		}
+		local rnd = math.random(1,10)
+		hadarprint(grabmessage[rnd],"noclan")
+		return
+	end
+
+	if arg == "set" and rest ~= nil then
+		local nm2 = rest:gsub(" ","_")
+		if table.find(nm2,Spellups["AS"]["namelist"]) ~= nil then
+			Spellups["EX"]["clanskillV1"] = Spellups["AS"]["namelist"][nm2]["skillnum"]
+			hadarprint("V1 Cskill set to: "..Spellups["AS"]["list"][Spellups["EX"]["clanskillV1"]]["name"].." @C[@G"..Spellups["EX"]["clanskillV1"].."@C]@w","script")
+		elseif nm2 == "none" then
+			Spellups["EX"]["clanskillV1"] = -1
+			hadarprint("V1 Cskill set to @Gnone","script")
+		else
+			hadarprint("Expecting spellname got: "..rest,"error")
+		end
+	else
+		if Spellups["EX"]["clanskillV1"] ~= -1 then
+			hadarprint("You can disable V1 cskill with @Ghsp cskill set none@w","script")
+			hadarprint("Current V1 Cskill set to: "..Spellups["AS"]["list"][Spellups["EX"]["clanskillV1"]]["name"].." @C[@G"..Spellups["EX"]["clanskillV1"].."@C]@w","script")
+		end
+		hadarprint("Current V2 Cskill set to: "..Spellups["AS"]["list"][Spellups["EX"]["clanskill"]]["name"].." @C[@G"..Spellups["EX"]["clanskill"].."@C]@w","script")
+	end
+end
+
+function HadarHelp(str)
+	local arg, rest
+	
+	if str == nil or str == "" or str == " " then
+		arg="nothing"
+	else
+		arg, rest = str:match("([0-9.a-zA-Z]*)%s*(.*)")
+		arg = tonumber(arg) or string.lower(arg)
+	end
+
+	if arg == "combat" then
+		hadarprint("@x086+-------------------------@G[@CC@combat @CH@celp @CF@ciles]@x086--------------------------+@w","helpfile2")
+		hadarprint("@x086| @x214hsp combat     @x110- @x214no argument shows a table with the spell number and @x086|","helpfile2")
+		hadarprint("@x086|                  @x214the spell name, these will be re-cast during combat @x086|","helpfile2")
+		hadarprint("@x086|                                                                      @x086|","helpfile2")
+		hadarprint("@x086| @x208hsp combat <SN or name>    @x110-@x208 will add or remove the skill from the   @x086|","helpfile2")
+		hadarprint("@x086|                              @x208list to recast in combat                @x086|","helpfile2")
+		hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
+		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
+	elseif arg == "timer" then
+		hadarprint("@x086+-------------------------@G[@CT@cimers @CH@celp @CF@ciles@G]@x086--------------------------+@w","helpfile2")
+		hadarprint("@x086| @x214hsp timer     @x110- @x214no argument shows a table with the spell number and  @x086|","helpfile2")
+		hadarprint("@x086|                 @x214the spell name, along with what timers are active    @x086|","helpfile2")
+		hadarprint("@x086|                                                                      @x086|","helpfile2")
+		hadarprint("@x086| @x208hsp timer <SN or name>    @x110- @x208will add or remove the skill from the    @x086|","helpfile2")
+		hadarprint("@x086|                             @x208list to show a timer, when added to the  @x086|","helpfile2")
+		hadarprint("@x086|                             @x208list both 30 second, and 10 second timers@x086|","helpfile2")
+		hadarprint("@x086|                             @x208are activated                            @x086|","helpfile2")
+		hadarprint("@x086| 	                   @REG@x110:@G hsp timer 71                                 @x086|","helpfile2")
+		hadarprint("@x086| 	   @x208turns on both the 30 and the 10 second timer for sanctuary       @x086|","helpfile2")
+		hadarprint("@x086|                                                                      @x086|","helpfile2")
+		hadarprint("@x086| @x214hsp timer set <SN or name> [10,30]   @x110-@x214 this will toggle the timer    @x086|","helpfile2")
+		hadarprint("@x086| 	                       @x110-@x214 the 2 timers are 10 seconds, and 30 seconds@x086|","helpfile2")
+		hadarprint("@x086| 	                       @x110-@x214 you can run 1 or both, or neither          @x086|","helpfile2")
+		hadarprint("@x086| 	                   @REG@x110:@G hsp timer set 71 30                          @x086|","helpfile2")
+		hadarprint("@x086| 	         @x214will toggle the 30 second timer to on or off               @x086|","helpfile2")
+		hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
+		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
+	elseif arg == "wraith" then
+		hadarprint("@x086+-------------------------@G[@CW@craith @CH@celp @CF@ciles@G]@x086--------------------------+@w","helpfile2")
+		hadarprint("@x086| @x214hsp wraith     @x110- @x214no argument shows a table with the spell number and @x086|","helpfile2")
+		hadarprint("@x086|                  @x214the spell name, these will be cast before the spell @x086|","helpfile2")
+		hadarprint("@x086|                  @x214wraith form is recast                               @x086|","helpfile2")
+		hadarprint("@x086|                                                                      @x086|","helpfile2")
+		hadarprint("@x086| @x208hsp wraith <SN or name>    @x110-@x208 will add or remove the skill from the   @x086|","helpfile2")
+		hadarprint("@x086|                              @x208list to cast before wraith form         @x086|","helpfile2")
+		hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
+		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
+	else
+		hadarprint("@x086+-------------------------@G[@CA@cuto @CS@cpells @WV:"..GetPluginInfo (GetPluginID (), 19).."@G]@x086-------------------------+@w","helpfile")
+		hadarprint("@x086| @x214hsp help                @x110- @x214Displays this helpfile                     @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp noauto <number>     @x110- @x208number optional, sets a spellnumber to not @x086|@w","helpfile")
+		hadarprint("@x086|                           @x208be recast, no argument to see list         @x086|@w","helpfile")
+		hadarprint("@x086|                           @x208EG. hsp noauto 58                          @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp noauto clear        @x110- @x214clears your noauto list                    @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp disable <check>     @x110- @x208Turns the script on or off, check is status@x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp reload              @x110- @x214 reloads the skills/spells use after tier  @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp autoaura <command>  @x110- @x208Has multiple commands, they are:           @x086|@w","helpfile")
+		hadarprint("@x086|                         @x110-@x208 On  @x110-@x214 enables wearing aura in combat       @x086|@w","helpfile")
+		hadarprint("@x086|                         @x110-@x208 Off @x110-@x214 diables wearing aura in combat       @x086|@w","helpfile")
+		hadarprint("@x086|                         @x110-@x208 aura <itemid> @x110-@x214 set the id of your aura    @x086|@w","helpfile")
+		hadarprint("@x086|                         @x110-@x208 bag <itemid> @x110-@x214 set the id of bag with aura @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp set <thing>         @x110- @x214Sets the message output for reports        @x086|@w","helpfile")
+		hadarprint("@x086|                         @x110- @glogo@x110,@G 30@x110,@G 10                               @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp channel <channel>   @x110- @x208no arguments displays the channel          @x086|@w","helpfile")
+		hadarprint("@x086|                           @REG@W.@G hsp channel spouse                     @x086|","helpfile")
+		hadarprint("@x086| @x214hsp report <screen> <log>@x110- @x214screen main or comm, log = comm log       @x086|@w","helpfile")
+		hadarprint("@x086|                           @REG@W.@G hsp report comm SpellTracker          @x086 |","helpfile")
+		hadarprint("@x086|                           @REG@W.@G hsp report main off                   @x086 |","helpfile")
+		hadarprint("@x086| @x208hsp seespells           @x110- @x208toggle seeing recasts                      @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp totem <spell>       @x110- @x214spell is either guidance or focus to recast@x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp elementalfocus <ele>@x110- @x208change the element for elemental focus     @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp elementalward <ele> @x110- @x214change the element for elemental ward      @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp gaiasfocus <element>@x110- @x208change the element for recast 	            @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp percent <number>    @x110- @x214Sets mana percentage to stop auto casting  @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp cskill [set name]   @x110- @x208shows\\add your current cskill along with SN@x086|@w","helpfile")
+		hadarprint("@x086+-------------------------@g[@CE@cxtra @CH@celp @CF@ciles@W:@g]@x086--------------------------+@w","helpfile")
+		hadarprint("@x086|                           @x214hsp help combat                            @x086|","helpfile")
+		hadarprint("@x086|                           @x208hsp help timer                             @x086|","helpfile")
+		hadarprint("@x086|                           @x214hsp help wraith                            @x086|","helpfile")
+		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile")
+	end
+end
+------------------------------------------------------------------------------------------------------------------------------------
+--HADAR STUFF---------
+------------------------------------------------------------------------------------------------------------------------------------
+
+
+	function NotifyNote(message)
+	   ColourNote ("Green", "", message)
+	end
+
+	function ErrorNote(message)
+	   ColourNote ("Red", "", message)
+	end
+
+	function DebugNote(message)
+   if(debug) then
+	   Note(message)
+   end
+	end
+
+	function Toggle()
+	   window_visible = not window_visible
+   if not window_visible then -- remove window
+	   WindowDelete(winid)
+   else
+	   window(true)
+   end
+	end
+
+	function ToggleDebug()
+	   debug = not debug
+	   NotifyNote("Debug is now " .. tostring(debug))
+	   SaveState()
+	end
+
+	function TogglePromptGag()
+	   prompt_gag = not prompt_gag
+	   stringified = not prompt_gag and "enabled" or "disabled"
+	   NotifyNote("Prompts will now be " .. stringified)
+	   SetupAffectTriggers()
+	   SaveState()
+	end
+--------------------------------------------------------------------------------------------------------------------------------
+-- UNDER CONSTRUCTION - THIS WILL BE USED TO TYPE SAFFECTS AND UPDATE THE TIMERS EVERY 120 SECONDS OR SO, TO KEEP THEM ON TIME
+--------------------------------------------------------------------------------------------------------------------------------
+
+	function AffectsListStart(name, line, wildcards)
+	   DebugNote("got start of Affects")
+	   EnableTrigger("aff_start_2", false)
+	   flags = trigger_flag.Enabled + trigger_flag.RegularExpression
+   if (prompt_gag) then
+	   flags = flags + trigger_flag.OmitFromOutput
+   end
+	--  Spell   : Elemental ward (10:41)
+	   AddTriggerEx("GRAB_SPELLS_TIME", "^Spell   : (.*?) (\\(\\d+:\\d+\\))$", "", flags, custom_colour.NoChange, 0, "", "AddAffectTimed", 0, 100)
+	   print(wildcards[1])
+	   print(wildcards[2])
+	--  AddTriggerEx("GRAB_SPELLS_TIME", "^(.*?) +(?:modifies .*? -?\\d+ )?for (\\d+) pulses.*?$", "", flags, custom_colour.NoChange, 0, "", "AddAffectTimed", 0, 100)
+
+	--  AddTriggerEx("GRAB_SPELLS_INDEFINITELY", "^(.*?) +(indefinitely).*$", "", flags, custom_colour.NoChange, 0, "", "AddAffect", 0, 100)
+	   AddTriggerEx("AFF_END", "Spell   : Detect hidden (30:30)", "", flags + trigger_flag.OneShot, custom_colour.NoChange, 0, "", "AffectsListEnd", 0, 100)
+	end -- AffectsListStart
+
+	function AffectsListEnd(name, line, wildcards)
+	   DebugNote("AffectsListEnd")
+	   DeleteTrigger("GRAB_SPELLS_TIME")
+	   DeleteTrigger("GRAB_SPELLS_INDEFINITELY")
+	end -- AffectsListEnd
+
+
+	-- --------------------------------------------------------------------
+	-- AddAffect (name, line, wildcards)
+	-- wildcards[1] must be in affect_icons table, otherwise prompt user for icons
+	-- --------------------------------------------------------------------
+	function AddAffectTimed(name, line, wildcards)
+		local sn = tonumber(wildcards.sn) --skill number
+		local tm = tonumber(wildcards.time) --time affected
+		
+		if Spellups["GL"]["disabled"] == "yes" then
+			return
+		end
+		
+		if contains(Spellups["EX"]["Timer"],sn) then
+			hadarprint("fired on lookup for timer","debug")
+			recoveryup(sn,tm)
+		end
+		
+		
+		Spellups["AF"]["list"][sn] = tm
+		Spellups["NA"][sn] = 1
+		
+		hadarprint("Affected by:"..Spellups["AS"]["list"][sn]["name"].." Time:"..tm,"debug")
+		Spellups["QS"][sn] = nil
+       -- DebugNote(wildcards[1])
+       -- DebugNote(wildcards[2])
+	   DebugNote("AddAffectTimed")
+       if(wildcards[1] ~= nil and wildcards[2] ~= nil) then
+           DebugNote("Spell: " .. wildcards[1])
+           DebugNote("Duration: " .. wildcards[2])
+           spell = wildcards[1]:lower()
+           duration = tonumber(wildcards[2])
+           local k, v = FindAffectInInfos(spell)
+           spell = string.gsub(spell, " ", "_")
+           if (k == -1 and duration > 0 and affect_icons[spell] ~= nil) then
+               start_time = os.time() + duration
+               DebugNote("Adding New Timed Affect")
+               PlaceNewGIF(path_prefix .. affect_icons[spell], nil, start_time, true)
+               hours, minutes, seconds = GetTimerTime(duration)
+               DebugNote(string.format("%02d:%02d:%02d", hours, minutes, seconds))
+               DebugNote("timer retval: " .. AddTimer(spell, hours, minutes, seconds, "", timer_flag.Enabled + timer_flag.OneShot, "RemoveAffectTimed"))
+               DebugNote("timer: " .. GetTimer(spell))
+               --tprint(infos)
+               DebugNote(infos.x)
+               --  local i, v = FindAffectInInfos(spell)
+               --  tprint(FindAffectInInfos(spell)[1])
+            elseif (duration > 0 and affect_icons[spell] ~= nil) then
+              v.enabled = true
+              v.start_time = os.time() + duration
+	        end -- if
+       end -- if
+	end -- AddEffectTimed
+
+	function GetTimerTime(pulses)
+	   seconds = pulses * pulse_length
+	   local hours = math.floor((seconds % 86400)/3600)
+	   local minutes = math.floor((seconds % 3600)/60)
+	   local seconds = math.floor(seconds % 60)
+	   return hours, minutes, seconds
+	end -- GetTimerTime
+
+	-- --------------------------------------------------------------------
+	-- AddAffect (name, line, wildcards)
+	-- wildcards[1] must be in affect_icons table, otherwise prompt user for icons
+	-- --------------------------------------------------------------------
+	function AddAffect(name, line, wildcards)
+	   DebugNote("AddAffect")
+	   DebugNote(wildcards[1])
+   if(wildcards[1] ~= nil) then
+	   new_affect = wildcards[1]
+   if (string.find(new_affect, "BODILYREQUIREMENTS")) then
+   if (string.find(new_affect, "HUNGER THIRST")) then
+	   DebugNote("BOTH")
+	   AddAffect(name, line, {"hungry"})
+	   AddAffect(Name, line, {"thirsty"})
+   elseif (string.find(new_affect, "HUNGER")) then
+	   DebugNote("HUNGER")
+	   AddAffect(name, line, {"hungry"})
+   elseif (string.find(new_affect, "THIRST")) then
+	   DebugNote("Thirst")
+	   AddAffect(name, line, {"thirsty"})
+   end
+    end
+
+	   new_affect = FixWildcardsForHungerThirst(wildcards[1])
+	   local k, v = FindAffectInInfos(new_affect)
+	   DebugNote(new_affect)
+   if(k == -1) then
+   if(affect_icons[new_affect] ~= nil) then
+	   PlaceNewGIF(path_prefix .. affect_icons[new_affect], true)
+   end
+    end -- if
+	 end -- if
+	  end -- AddEffect
+
+	function FixWildcardsForHungerThirst(match)
+   if (match == "HUNGER" or match == "full") then
+       match = "hungry"
+   elseif (match:lower() == "thirst") then
+	   match = "thirsty"
+   elseif (match:lower() == "broth") then
+	   match = "both"
+   end -- if
+	   return match
+	end
+
+	-- --------------------------------------------------------------------
+	-- RemoveAffectTimed (name, line, wildcards)
+	-- wildcards[1] must be an active effect
+	-- --------------------------------------------------------------------
+	function RemoveAffectTimed(name, line, wildcards)
+	   DebugNote("RemoveAffectTimed")
+	   name = string.gsub(name, "_", " ")
+	   DebugNote(name)
+
+
+       if(name ~= nil) then
+           local k, v = FindAffectInInfos(name)
+	       DebugNote("k:" .. tostring(k))
+           if (k >= 0) then
+	         DebugNote("Seting affect to off " .. tostring(k))
+             spell = wildcards[1]:lower()
+             if(affect_icons[new_affect] ~= nil) then
+               DebugNote("Showing disabled icon for "..spell)
+	           --table.remove(infos, k)
+             else
+               DebugNote("Ignoring spell, no known icon "..spell)
+             end
+
+	    --     window(true) -- Redraw   (THIS WAS CAUSING FLICKERING)
+           end -- if
+	      end -- if
+	end -- RemoveAffect
+
+	-- --------------------------------------------------------------------
+	-- RemoveAffect (name, line, wildcards)
+	-- wildcards[1] must be an active effect
+	-- --------------------------------------------------------------------
+	function RemoveAffect(name, line, wildcards)
+	   DebugNote(wildcards[1])
+	   DebugNote("RemoveAffect")
+   if(wildcards["affect"] ~= nil) then
+	   affect = wildcards["affect"]
+	   affect = FixWildcardsForHungerThirst(affect)
+	   affect = affect:lower()
+	   -- Handle broth
+   if (affect == "both") then
+	   DebugNote("Handling Broth")
+	   wildcards["affect"] = "hunger"
+	   RemoveAffect(name, line, wildcards)
+       wildcards["affect"] = "thirsty"
+	   RemoveAffect(name, line, wildcards)
+   do return end
+   end -- if
+	   DebugNote(affect)
+	   local k, v = FindAffectInInfos(affect)
+	   DebugNote("k:" .. tostring(k))
+   if (k >= 0) then
+       if (bad_affects[wildcards[1]]) then
+	     DebugNote("Removing bad affect " .. tostring(k))
+	     table.remove(infos, k)
+		 --tprint(infos)
+		 v.enabled = false
+		 -- Clear out the pixels of where the removed spell is going to be, and then draw it again using PlayMovieFrame (v)
+		 WindowRectOp (winid, 2, movieInfo.x, movieInfo.y, movieInfo.x + image_size, movieInfo.y + image_size, ColourNameToRGB("bg_color"))
+		 WindowRectOp (winid, 2, movieInfo.x, movieInfo.y + image_size + text_margin_top, movieInfo.x+image_size, movieInfo.y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
+		 bad_affect = true
+		 print("BAD AFFECT: ", bad_affect)
+		 PlayMovieFrame (v) -- this is added in place of window(true) to avoid the flickering (MAYBE MOVE BACK DOWN TO WINDOW(TRUE) SPOT)
+       else
+         DebugNote("Showing disabled icon for "..spell)
+		 bad_affect = false
+         v.enabled = false
+	     affect = string.gsub(affect, " ", "_")
+	     DebugNote(affect)
+	     DebugNote(DeleteTimer(affect))
+       end
+	 --  window(true) -- Redraw (THIS WAS CAUSING FLICKERING)
+   end
+	end
+	 end -- RemoveAffect
+
+	function FindAffectInInfos(name)
+   for k, v in pairs(infos) do
+   if (affect_icons[name] ~= nil and string.match(v.filename, affect_icons[name]) ~= nil) then
+		 return k, v
+   end
+	end
+	 return -1, -1
+	  end -- FindAffectInInfos
+
+	function GetNumFrames(filename)
+	   return GetNumFramesHelper(filename, 0)
+	end -- GetNumFrames
+
+	function GetNumFramesHelper(filename, i)
+	   old_filename = filename
+	   filename = string.format (filename, i + 1)
+	   DebugNote("filename_numframehelp = " .. filename)
+	   local f = io.open(filename, "r")
+   if f ~= nil and i < 1000 then
+	   io.close(f)
+	   filename = old_filename
+	   return GetNumFramesHelper(filename, i + 1)
+   else
+	   DebugNote("f no exists::i=" .. tostring(i))
+	      return i
+	   end
+	end -- GetNumFrames
+
+	-- --------------------------------------------------------------------
+	-- PlayGif (info)
+	--  info.filename (eg. "/frames/my_Gif_%03i.png" )
+	--  info.frames   (eg. 10, if the Gif consists of 10 files)
+	--  info.x   - X position on screen
+	--  info.y   - Y position on screen
+
+	--  Suggested conversion:
+	--    ffmpeg -ss "00:30" -i INPUTFILE.mp4 -t 1     -r 10 -s 720x404 frames/my_Gif_%03i.png
+	--                ^^^^          ^^^       ^^^^     ^^^^^    ^^^^^^^    ^^^^^^^^^^
+	--           Start time      input file  how long   FPS       size      output files
+	-- --------------------------------------------------------------------
+
+	function PlayMovie (info)
+	   movieInfo = info
+
+   if not info then
+	   return
+   end -- if
+
+	   assert (type (movieInfo) == "table",
+	   "Argument to PlayMovie should be a table")
+
+	   -- see if already in table
+	   if infos [info.filename] then
+	      --return
+	   end -- if already there
+
+	   local gotErrors = false
+
+   -- load the disabled frame into memory
+   if not WindowImageInfo(winid, movieInfo.disabled_filename, 2) then
+       local result = WindowLoadImage(winid, movieInfo.disabled_filename, movieInfo.disabled_filename)
+   end
+
+	   -- load each movie frame into memory, if not already done
+   for i = 1, movieInfo.frames do
+   local filename = string.format (movieInfo.filename, i)
+   if not WindowImageInfo(winid, filename, 2) then
+       local result = WindowLoadImage(winid, filename, filename)
+
+   if result ~= error_code.eOK then
+	   ErrorNote ("Could not open move frame file:")
+	   ErrorNote ("   -> " .. filename)
+	   ErrorNote ("   Reason: " .. error_desc [result])
+	   gotErrors = true
+   end -- if
+	end -- if
+	 end -- for each frame
+
+
+	   -- if couldn't do it, discard the movie info
+   if gotErrors then
+	   movieInfo = nil
+   return
+   end -- if
+
+	   -- otherwise, start at frame 1
+	   movieInfo.currentFrame = 1
+
+	   -- put into table of infos
+	   table.insert(infos, movieInfo)
+	end -- PlayMovie
+
+	-- --------------------------------------------------------------------
+	-- PlayMovieFrame - show current frame, advance count
+	-- --------------------------------------------------------------------
+	function PlayMovieFrame (movieInfo)
+       -- timing stuff
+	   timeTaken = timeTaken or 0
+	   frameCount = frameCount or 0
+
+	   local startTime = utils.timer ()
+	   local filename
+       local errorCode
+       
+       local imageWidth = image_size
+       local imageHeight = image_size
+
+       -- Draw the correct frame number if the spell is enabled, otherwise draw the disabled image
+       if (movieInfo.enabled) then
+         filename = string.format (movieInfo.filename, movieInfo.currentFrame)
+         errorCode = WindowDrawImage (winid, filename, movieInfo.x, movieInfo.y, movieInfo.x + imageWidth, movieInfo.y + imageHeight, miniwin.image_stretch)
+       else
+         filename = movieInfo.disabled_filename
+
+         -- Because this is a partially transparent image, need to clear out any pixels before drawing
+		 --TODO: ADD IF STATEMENT BELOW TO ONLY DO THIS WINDOWRECTOP IF ITS A BADEFFECT, OTHERWISE DON'T
+         WindowRectOp (winid, 2, movieInfo.x, movieInfo.y, movieInfo.x + imageWidth, movieInfo.y + imageHeight, ColourNameToRGB("bg_color"))
+		 if WindowInfo("hiddenWindow", 4) == nil then
+			DebugNote("No hidden window, creating it now!")
+			WindowCreate (hiddenWindow, 0, 0, 0, 0, 12, 3, ColourNameToRGB(bg_color))
+		end
+
+         -- Here we need to draw the image in a hidden window, resize that window, draw the image transparently, and later draw it stretched
+		 image_down = filename
+		 tprint(movieInfo)
+
+		 if WindowLoadImage (hiddenWindow, image_down, filename) == 0 then
+			WindowResize (hiddenWindow, WindowImageInfo(hiddenWindow, image_down, 2), WindowImageInfo(hiddenWindow, image_down, 3), ColourNameToRGB(bg_color))
+			WindowDrawImageAlpha (hiddenWindow, image_down, 0, 0, 0, 0, 0.3)
+			WindowImageFromWindow(winid, image_down, hiddenWindow)
+		 end
+       -- if not string.match(image_down, "%w+_down.png") then 
+			DebugNote(path_prefix)
+         -- Now go ahead and draw the image (used to be alpha, and instead of stretch, 0.5)
+		 if bad_affect == false then
+         errorCode = WindowDrawImage (winid, image_down, movieInfo.x, movieInfo.y, movieInfo.x + imageWidth, movieInfo.y + imageHeight, miniwin.image_stretch)
+		 WindowRectOp (winid, 2, movieInfo.x,  movieInfo.y + image_size + text_margin_top, movieInfo.x+image_size,  movieInfo.y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
+		 else
+			errorCode = error_code.eOK
+			WindowRectOp (winid, 2, movieInfo.x,  movieInfo.y + image_size + text_margin_top, movieInfo.x+image_size,  movieInfo.y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
+		 -- Now set the down_image to nothing, so it can draw the next one.
+		 	image_down = 0
+		 end
+		--else
+		--	WindowRectOp (winid, 2, movieInfo.x,  movieInfo.y + image_size + text_margin_top, movieInfo.x+image_size,  movieInfo.y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
+		--	DebugNote("THIS IS GOOD")
+			
+		--end
+       end
+       --long WindowDrawImage(BSTR WindowName, BSTR ImageId, long Left, long Top, long Right, long Bottom, short Mode, long SrcLeft, long SrcTop, long SrcRight, long SrcBottom);
+
+	   	   	   -- Redraw icons
+   if (#infos >= 1) then
+	tmp_infos = infos
+	infos = {}
+	warned = false
+for i, v in ipairs(tmp_infos) do
+	x, y = FindNextPos(image_size)
+	v.x = x
+	v.y = y
+if(not warned and (x > win_width or y > win_height)) then
+	warned = true
+	Note("Your Affects window is too small to show all the icons, make it bigger!")
+end
+	table.insert(infos, v)
+ end
+end
+
+	   if errorCode ~= error_code.eOK then
+	   ErrorNote ("Could not draw image: " .. filename)
+	   end -- if
+	   if IsConnected() then -- only count down the timer/redraw when you're connected to the game
+	   end_time = os.time()
+	   current_time = start_time - end_time
+	   CallPlugin("abc1a0944ae4af7586ce88dc", "BufferedRepaint")
+	   end
+
+       -- next frame
+	   movieInfo.currentFrame = movieInfo.currentFrame + 1
+
+       -- wrap
+   if movieInfo.currentFrame > movieInfo.frames then
+	   movieInfo.currentFrame = 1
+   end -- if
+
+       -- add up how long we took doing this
+	   timeTaken = timeTaken + utils.timer () - startTime
+       -- and how many times
+	   frameCount = frameCount + 1
+	end -- PlayMovieFrame
+	   lastRefresh = 0
+	function time_left()
+	   duration = duration -
+	   DebugNote(duration)
+   if duration then
+       return string.format("%2i", duration - os.time())
+   else
+       return "??"
+   end
+    end
+
+	-- --------------------------------------------------------------------
+	-- PlayAllMovieFrames - called by a timer every 1/10 second - calls
+	--                      PlayMovieFrame for each movie in the table
+	-- --------------------------------------------------------------------
+	function PlayAllMovieFrames (timerName)
+	   for i, j in ipairs(infos) do
+           if (infos[i].enabled) then
+               -- Only display the timer if the spell is enabled
+               local spell_timer = infos[i].start_time - os.time() or 0
+
+               if spell_timer >= 600 then
+               timer_color = ColourNameToRGB("lime")
+               elseif spell_timer <= 599 and spell_timer >= 120 then
+               timer_color = ColourNameToRGB("yellow")
+               elseif spell_timer <= 119 then
+               timer_color = ColourNameToRGB("red")
+               end
+        --	    for k, v in pairs (infos) do
+               WindowRectOp (winid, 2, infos[i].x, infos[i].y + image_size + text_margin_top, infos[i].x+image_size, infos[i].y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
+               
+               -- [DONE]TODO: Center the text using WindowTextWidth to compute text width before hand 
+			  timerWidth = WindowTextWidth(winid, "font", spell_timer)
+			  if timerWidth <= 99 then
+				timerWidth = timerWidth + 8
+			  elseif timerWidth <= 9 then
+				timerWidth = timerWidth + 16
+			  end
+			--  print(timerWidth)
+               WindowText(winid, "font", spell_timer, infos[i].x + image_size/4, infos[i].y + image_size + text_margin_top, 0, 0, timer_color)
+           end
+       end
+
+   for k, v in pairs (infos) do
+
+       -- We need to redraw if any of the following are true:
+       -- 1) v.lastDrawState == nil - the frame has never been drawn
+       -- 2) v.enabled is true - the animation is showing, needs to be updated every frame
+       -- 3) v.lastDrawState ~= v.enabled - we are switching from enabled to disabled
+       if (v.lastDrawState == nil or v.enabled or v.lastDrawState ~= v.enabled) then
+           PlayMovieFrame (v)
+       end
+
+       v.lastDrawState = v.enabled
+   end
+
+   end -- PlayAllMovieFrames
+
+	function TableLength(T)
+	   local count = 0
+	   for _ in pairs(T) do count = count + 1 end
+	   return count
+	end
+
+	-- 16x16 at top, 32x32 below
+	-- Offsets due to window border
+	x_off = 2
+	y_off = 18
+	gif_size = image_size
+	-- --------------------------------------------------------------------
+	-- PlaceNewGif (filename, frames)
+	--  filename (eg. "bread" ), expected to be in worlds/plugins/images/frames/filename_%03i.png
+	-- --------------------------------------------------------------------
+	function PlaceNewGIF(filename, frames, start_time, enabled)
+       local disabled_filename = filename.."_down.png"
+       filename = filename.."_%03i.png"
+	   DebugNote("PlaceNewGIF")
+	   DebugNote("filename: " .. filename)
+	   local rows = math.floor(win_height / gif_size)
+	   local cols = math.floor(win_width / gif_size)
+	   local frames = GetNumFrames(filename)
+	   DebugNote("frames: " .. tostring(frames))
+	   DebugNote("win_width " .. win_width)
+	   DebugNote("win_height " .. win_height)
+	   DebugNote("row " .. rows)
+	   DebugNote("col " .. cols)
+   if (frames ~= 0) then
+	   num_gifs = #infos
+	   movieInfo = info
+
+	   -- Find position
+
+	   x,y = FindNextPos(image_size)
+	   PlayMovie {
+	   filename = filename,
+       disabled_filename = disabled_filename,
+	   frames = frames,
+	   x = x,
+	   y = y,
+       enabled = enabled,
+       start_time = start_time}
+   elseif(not warned_about_missing_files) then
+	   warned_about_missing_files = true
+	   ErrorNote ("Could not find any frames matching " .. filename)
+   end
+	end
+--SHOULD THIS BE IMAGE_SIZE??
+	function FindNextPos(size)
+	   rows = math.floor(win_height / size)
+	   cols = math.floor(win_width / size)
+	   cur_col = math.floor((#infos) % cols)
+	   cur_row = math.floor((#infos)/ cols) >= 0 and math.floor((#infos)/ cols) or 0
+	   x = x_off + cur_col*size
+	   y = y_off + cur_row*size + cur_row * (text_height + text_margin_top) 
+	   --DebugNote("#infos " .. #infos)
+	   --DebugNote("num_row " .. num_row)
+	   --DebugNote("cur_row " .. cur_row)
+	   --DebugNote("cur_row_test " .. cur_row_test)
+	   --DebugNote("num_col " .. num_col)
+	   --DebugNote("cur_col " .. cur_col)
+	   --DebugNote("cols " .. cols)
+	   --DebugNote("rows " .. rows)
+	   return x, y
+	end
+
+
+
+
+	function window(redraw)
+	   DebugNote("window(" .. tostring(redraw) .. ")")
+	   if not window_visible then
+	      return
+	   end
+
+   if redraw then
+	   WindowDelete("winid")
+	   WindowCreate(winid, pos_x, pos_y, win_width, win_height, 0, 0, ColourNameToRGB(bg_color))
+	   WindowPosition(winid, pos_x, pos_y, 0, 2)
+	   WindowSetZOrder(winid, 201)
+	   WindowFont(winid, "f1", font_name, font_size, false, false, false, false)
+	   WindowFont(winid, "b1", font_name, font_size, true, false, false, false)
+	   WindowFont(winid, "s1", font_name, font_size - 1, false, false, false, false)
+	   movewindow.install(winid, 6, 2, true, nil, {mouseup=MouseUp, mousedown=MouseDown, dragmove=LeftClickOnly, dragrelease=LeftClickOnly})
+	   -- register with the z-order monitor
+	   CallPlugin("462b665ecb569efbf261422f", "registerMiniwindow", winid)
+	   movewindow.add_drag_handler (winid, 0, 0, 0, win_height)
+	   WindowAddHotspot(winid, "resize", win_width - grip_resize, win_height - grip_resize, win_width, win_height, "MouseOver", "CancelMouseOver", "MouseDown", "", "MouseUp", "", 6, 0)
+	   WindowDragHandler(winid, "resize", "ResizeMoveCallback", "ResizeReleaseCallback", 0)
+   else
+	   WindowResize(winid, win_width, win_height, ColourNameToRGB(bg_color))
+	   WindowMoveHotspot(winid, "resize", win_width - grip_resize, win_height - grip_resize, win_width, win_height)
+	  end
+	   WindowShow(winid, true)
+	   show_window()
+	   end
+
+
+
+	function show_window()
+	   WindowRectOp(winid, 2, 2, 1, -2, -2, ColourNameToRGB(bg_color)) -- blank canvas
+	   --WindowRectOp(winid, 2, 0, 0, 0, 22, ColourNameToRGB(title_bg_color)) -- title background
+	   --WindowRectOp(winid, 1, 0, 0, 0, 0, ColourNameToRGB(border_color)) -- border
+	   --Theme.Draw3DRect(winid, 0, 0, 0, 0, depressed) -- themed window
+
+	   title = "Affects Window" -- default title
+
+	   Theme.DrawTitleBar(winid, "f1", title, "center") -- them window title (has to be drawn before border) This is the title bar that says the leader name
+	   Theme.DrawBorder(winid) -- theme window border
+	   left, top = 7, 17 -- bar location
+	   across = 0
+	   rows = 0
+	   Theme.AddResizeTag(winid, 2, nil, nil, "MouseDown", "ResizeMoveCallback", "ResizeReleaseCallback") -- resize grip
+	   CallPlugin("abc1a0944ae4af7586ce88dc", "BufferedRepaint")
+	end
+
+	function ResizeMoveCallback()
+	   --DebugNote("ResizeMoveCallback")
+	   local x_offset, y_offset = start_x - WindowInfo(winid, 17), start_y - WindowInfo(winid, 18)
+	   start_x, start_y = WindowInfo(winid, 17), WindowInfo(winid, 18)
+	   win_width = win_width - x_offset
+	   win_height = win_height - y_offset
+   if os.clock() - last_refresh >= .05 then
+	   --DebugNote("redraw")
+	   last_refresh = os.clock()
+	   window(false)
+   end
+	end
+
+	function ResizeReleaseCallback()
+	   --DebugNote("ResizeReleaseCallback")
+	   window(true)
+	   SaveState()
+	end
+
+	function MouseDown(flags, id)
+	   --DebugNote("MouseDown")
+   if id == "resize" then
+	   start_x, start_y = WindowInfo(winid, 17), WindowInfo(winid, 18)
+   end
+	end
+
+	function MouseUp(flags, id, win)
+	   --DebugNote("MouseUp")
+	   if bit.band(flags, 0x20) ~= 0 then -- right click
+	      right_click_menu()
+	   end
+	   pos_x, pos_y = WindowInfo(winid, 10), WindowInfo(winid, 11)
+	   SaveState()
+	end
+
+	function right_click_menu()
+	   local x, y = WindowInfo(winid, 14), WindowInfo(winid, 15)
+
+	   local str = "!"
+
+	   str = str.."Bring to Front"
+
+	   str = str.."|-|Send to Back"
+       
+       str = str.."|-|Set images to small (32)"
+       
+       str = str.."|-|Set images to large (64)"
+
+	   opt = WindowMenu(winid, x, y, str)
+
+	   if opt == "" then
+	      return
+	   end
+
+	   opt = tonumber(opt)
+
+   if opt == 1 then -- Bring to Front
+	   CallPlugin("462b665ecb569efbf261422f","boostMe", winid)
+	   --  print("Bring to Front")
+   elseif opt == 2 then -- Send to back
+	   CallPlugin("462b665ecb569efbf261422f","dropMe", winid)
+	   --  print("Sent to Back")
+   elseif opt == 3 then -- Image size small
+       image_size = 32
+	   SetVariable("image_size", image_size)
+   elseif opt == 4 then -- Image size large   
+       image_size = 64
+	   SetVariable("image_size", image_size)
+   end
+   SaveState()
+	   window(true)
+    end
+
+	function CancelMouseOver(flags, id)
+	   --DebugNote("CancelMouseOver")
+	   -- nothing
+	end
+
+	function CancelMouseDown(flags, id)
+	   --DebugNote("CancelMouseDown")
+	   -- nothing
+	end
+
+	function SaveState()
+	   SetVariable("pos_x", pos_x)
+	   SetVariable("pos_y", pos_y)
+	   SetVariable("win_width", win_width)
+	   SetVariable("win_height", win_height)
+	   SetVariable("debug", tostring(debug))
+	   SetVariable("prompt_gag", tostring(prompt_gag))
+	end
+	function TogglePromptGag()
+	   prompt_gag = not prompt_gag
+	   stringified = not prompt_gag and "enabled" or "disabled"
+	   NotifyNote("Prompts will now be " .. stringified)
+	   SetupAffectTriggers()
+	   SaveState()
+	end
+
+	function SetupAffectTriggers()
+	   DebugNote("function SetupAffectTriggers()")
+	   flags = trigger_flag.Enabled + trigger_flag.RegularExpression
+	   if (prompt_gag) then
+	      flags = flags + trigger_flag.OmitFromOutput
+	   end
+	   DebugNote(flags)
+	   DebugNote(prompt_gag)
+	   DebugNote(DeleteTrigger("aff_start_1"))
+	   DebugNote(DeleteTrigger("aff_start_2"))
+	 --  DebugNote(AddTriggerEx("aff_start_1", "^You are affected by the following:$", "", flags, custom_colour.NoChange, 0, "", "enable_aff_start_2", 0, 100))
+	   DebugNote(AddTriggerEx("aff_start_1", "^You are affected by the following:$", "", flags - trigger_flag.Enabled, custom_colour.NoChange, 0, "", "enable_aff_start_2", 0, 100))
+	   DebugNote("Setup")
+	   DebugNote(AddTriggerEx("aff_start_2", "$Spell   : Detect hidden \\(\\d+:\\d+\\)", "", flags - trigger_flag.Enabled, custom_colour.NoChange, 0, "", "AffectsListStart", 0, 100))
+	end
+
+		function enable_aff_start_2()
+	   DebugNote(EnableTrigger("aff_start_2", true))
+	end
+
+	function loaded()
+		util.print("@W--------------------------------------------------------------------------------")
+		util.print("@WPlugin Name  : @RG@Yr@Ga@Cp@Bh@Mi@mc@Ra@Yl @x238Affects Window")
+		util.print("@WAuthor       : @x238Khadaji, TinyPotato")
+		util.print("@WVersion      : @G" .. version)
+		util.print("@W--------------------------------------------------------------------------------")
+		end
+
+	function OnPluginInstall()
+		if GetVariable ("enabled") == "false" then
+			ColourNote ("yellow", "", "Warning: Plugin " .. GetPluginName ().. " is currently disabled.")
+			check (EnablePlugin(GetPluginID (), false))
+			return
+		end -- they didn't enable us last time
+		hadarprint("@YInstalling @c"..GetPluginName().."@Y version @c"..GetPluginInfo (GetPluginID (), 19).."@Y...","script")
+		hadarprint("had help (to see all of hadar's plugin helpfiles), or hsp help to just see this one","script")
+
+	   debug = false
+	   WindowFont(winid, "font", font_name, font_size, false, false, false, false, 0)
+	   SetupAffectTriggers()
+	   	  
+		OnPluginEnable () --maybe move this
+	   
+	   DoAfterSpecial(.2, "loaded()", 12)
+	end
+
+	function OnPluginEnable()
+		
+	Spellups = {}
+	Spellups["GL"] = {}
+    Spellups["AS"] = {}
+	Spellups["AF"] = {} --affected by
+	Spellups["NA"] = {} --not affected by
+	Spellups["QU"] = {} --spellup queue
+	Spellups["EX"] = {} --exceptions
+	Spellups["QS"] = {} --queued spells
+	Spellups["RT"] = {} --recoverys
+	Spellups["MS"] = {} --messages
+	Spellups["CG"] = {} --configs (mainly for special cases)
+	
+	if GetVariable ("pastfirstinstall") == "true" then
+		assert (loadstring (GetVariable ("Spellups") or "")) ()
+	else
+		hadarprint("@CLooks like this is your first install, Lets get you setup! @Ghsp@C for help","script")
+		buildInitial()
+	end
+	
+	-- the following lines need to be in onpluginenable to recheck stuff and set current state for buildslist
+	
+	charstatus = gmcp("char.status") -- fetch char.status and return it as a Lua table
+    currentState = tonumber(charstatus.state)
+	maxmana = tonumber(gmcp("char.maxstats.maxmana")) or -1
+	currentmana = tonumber(gmcp("char.vitals.mana")) or -1
+	
+	Spellups["GL"]["clan"] = gmcp("char.base.clan") -- fetch char.base and return it as a Lua table
+	 
+	if Spellups["GL"]["clan"] == "loner" or Spellups["GL"]["clan"] == "outcast" or Spellups["GL"]["clan"] == "exile" then
+		Spellups["GL"]["clan"] = "none"
+	end
+	hadarprint("Current clan is "..Spellups["GL"]["clan"],"debug")
+	
+	if Spellups["GL"]["clan"] ~= "none" then 
+		if Spellups["GL"]["clan"] ~= "" then
+			Spellups["EX"]["clanskill"] = tonumber(table.find(Spellups["GL"]["clan"],Spellups["AS"]["cSkills"])) or "none"
+			hadarprint("Clan skill:"..Spellups["EX"]["clanskill"],"debug")
+			if Spellups["EX"]["clanskill"] == "none" or Spellups["EX"]["clanskill"] == nil or Spellups["EX"]["clanskill"] == "" then
+				hadarprint("Your Clan skill is not noted, please contact hadar","error")
+			else
+				hadarprint("Clan skill Set to: @G"..Spellups["AS"]["list"][Spellups["EX"]["clanskill"]]["name"].." @C[@G"..Spellups["EX"]["clanskill"].."@C]@w","script")
+			end
+		end
+	end
+	
+	injectVars()
+	if currentState == 3 then
+		SendSlistCommand()
+	end
+
+	if maxmana == nil or maxmana == -1 then
+		Spellups["EX"]["percentageStop"] = 0
+	else
+		Spellups["EX"]["percentageStop"] = (maxmana*Spellups["EX"]["percentage"]/100)
+	end
+
+	local fonts = utils.getfontfamilies ()
+   	
+	if fonts["Courier New"] then
+    	utfset = true
+   	elseif fonts ["Lucida Console"] then
+		utfset = true
+   	elseif fonts ["Liberation Mono"] then
+    	utfset = true
+   	else
+		utfset = false
+   end
+   window(true)
+end
+
+	function OnPluginDisable()
+	   WindowDelete(winid)
+	end
+
+	function OnPluginClose()
+	   WindowDelete(winid)
+	end
+
+
+	function OnPluginConnect()
+	   DebugNote("OnPluginConnect")
+	   SetupAffectTriggers()
+	end
+
+	function OnPluginSaveState()
+			Spellups["GL"]["initilized"] = "yes"
+			SetVariable ("Spellups", "Spellups = " .. serialize.save_simple (Spellups))
+			SetVariable ("pastfirstinstall", "true")
+			SaveState()
+		end -- function OnPluginSaveState
+
+	function OnPluginWorldSave()
+	   SaveState()
+	end
+
+	function OnPluginDisable()
+	   SaveState()
+	end
+
+	function OnPluginDisconnect()
+	   SaveState()
+	end
+
+------------------------------------------------TO DO --------------------------------------------------------
+--[[***[HIGH PRIORITY]***
+on login, reconnect, etc, type aflags to check for perm sanc and other effects
+check saf sanc and aflags? ^^
+
+
+If sanctuary is ON via some methods, and you wear the sanc aura, leave the timer and when it falls if the aura is on
+change timer to PERMA
+
+
+Aardwolf Aura of Sanctuary stops floating around you.
+Aardwolf Aura of Sanctuary begins floating around you.
+
+-- [DONE] MAKE NUMBERS SHOW GREEN WHEN OVER 10 MINUTES, YELLOW WHEN UNDER 10, RED WHEN UNDER 5 BLACK WHEN OFF?
+add grey icons of all icons
+add PERMA or infinity timer
+add right click system to set priorities
+add protection good icon
+add protection evil icon
+add sanc aura wear/remove
+add haste boots wear/remove
+handle wraith form
+
+--check EQ on login/reconnect, etc. add string for wear/remove sanc aura/boots of speed, etc
+
+--when logging on use priority system to load grey images of all priorities
+-- FIX DRAWING OF TIMERS WHEN VERTICAL DRAWING
+-- ADD AN ACTUAL FUCKTON MORE AFFECT_ICONS AND ASSIGN TO SPELL NUMBERS                                    ]]--
+	----------------------------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------------------------
+
+	-- For saving state when reloading w/ bast's plugins plugin
+	function OnPluginListChanged()
+	   SaveState()
+	end
+
+	window(true)
+    ]]>
+</script>
+
+</muclient>
