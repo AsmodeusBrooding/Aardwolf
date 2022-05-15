@@ -365,10 +365,12 @@ local ascii_2_utf82 = {
 
 --[[
 
-Special thanks to:
+Animated Gif portion, GUI of the script completely by Khadaji with lots of help from TinyPotato
+
+Special thanks for the spellup portion to:
 Khadaji, assisted in adding in some functions
-scars, tester
-ladydragon, tester
+Scars, tester
+LadyDragon, tester
 Saori, tester
 
 
