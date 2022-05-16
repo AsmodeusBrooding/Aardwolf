@@ -242,6 +242,7 @@ version="1.0"
      omit_from_output="y"
      sequence="100"
      script="affoff"
+	 keep_evaluating="y"
 >
 </trigger>
 <trigger
@@ -2811,7 +2812,7 @@ end
 	function loaded()
 		util.print("@W--------------------------------------------------------------------------------")
 		util.print("@WPlugin Name  : @RG@Yr@Ga@Cp@Bh@Mi@mc@Ra@Yl @x238Affects Window")
-		util.print("@WAuthor       : @x238Khadaji, TinyPotato")
+		util.print("@WAuthor       : @x238Khadaji, TinyPotato, Hadar")
 		util.print("@WVersion      : @G" .. version)
 		util.print("@W--------------------------------------------------------------------------------")
 		end
