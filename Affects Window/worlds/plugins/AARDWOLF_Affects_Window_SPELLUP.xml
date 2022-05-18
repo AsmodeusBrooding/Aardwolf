@@ -43,6 +43,14 @@ version="1.0"
       >
   </alias>
     <alias
+  regexp="y"
+  match="^affects info check$"
+  enabled="y"
+  sequence="100"
+  send_to="12"
+  ><send>tprint(infos)</send>
+</alias>
+    <alias
       regexp="y"
       match="^affects test$"
       enabled="y"
@@ -445,7 +453,7 @@ TODO:
     }
 
 	path_prefix = "worlds\\plugins\\images\\affects\\"
-    debug = GetVariable("debug") or false
+    debug = GetVariable("debug") or "false"
     prompt_gag = GetVariable("prompt_gag") or false
     pulse_length = 1
 
@@ -762,10 +770,10 @@ function SlistUpdate(name, line, wildcards)
 			duration = du
 		    local k, v = FindAffectInInfos(spell)
 			spell = string.gsub(spell, " ", "_")
-			print("SPELL: ",spell .. " DURATION: ",duration)
-			print("K: ", k)
+			DebugNote("SPELL: ",spell .. " DURATION: ",duration)
+			DebugNote("K: ", k)
 			if (k == -1 and duration > 0 and affect_icons[spell] ~= nil) then
-				print("working")
+				DebugNote("working")
 				start_time = os.time() + duration
 				DebugNote("Adding New Timed Affect")
 				PlaceNewGIF(path_prefix .. affect_icons[spell], nil, start_time, true)
@@ -1381,6 +1389,8 @@ end
 
 function HSPreload()
 	hadarprint("Reloading Spellup plugin","script")
+	infos = {}
+	show_window()
 	slistCommandSent = false
 	SendSlistCommand()
 end
@@ -2041,12 +2051,12 @@ function HadarHelp(str)
 		hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
 		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
 	else
-		hadarprint("@x086+-------------------------@G[@CA@cuto @CS@cpells @WV:"..GetPluginInfo (GetPluginID (), 19).."@G]@x086-------------------------+@w","helpfile")
-		hadarprint("@x086| @x214hsp help                @x110- @x214Displays this helpfile                     @x086|@w","helpfile")
-		hadarprint("@x086| @x208hsp noauto <number>     @x110- @x208number optional, sets a spellnumber to not @x086|@w","helpfile")
-		hadarprint("@x086|                           @x208be recast, no argument to see list         @x086|@w","helpfile")
-		hadarprint("@x086|                           @x208EG. hsp noauto 58                          @x086|@w","helpfile")
-		hadarprint("@x086| @x214hsp noauto clear        @x110- @x214clears your noauto list                    @x086|@w","helpfile")
+		hadarprint("@x086+-------------------------@G[@RA@rffects @RW@rindow @x238| @CA@cuto @CS@cpells @WV:"..GetPluginInfo (GetPluginID (), 19).."@G]@x086-------------------------+@w","helpfile")
+		hadarprint("@x086| @x214hsp help                @x110- @x214Displays this helpfile                      @x086|@w","helpfile")
+		hadarprint("@x086| @x208hsp noauto <number>     @x110- @x208number optional, sets a spellnumber to not  @x086|@w","helpfile")
+		hadarprint("@x086|                           @x208be recast, no argument to see list          @x086|@w","helpfile")
+		hadarprint("@x086|                           @x208EG. hsp noauto 58                           @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp noauto clear        @x110- @x214clears your noauto list                     @x086|@w","helpfile")
 		hadarprint("@x086| @x208hsp disable <check>     @x110- @x208Turns the script on or off, check is status@x086|@w","helpfile")
 		hadarprint("@x086| @x214hsp reload              @x110- @x214 reloads the skills/spells use after tier  @x086|@w","helpfile")
 		hadarprint("@x086| @x208hsp autoaura <command>  @x110- @x208Has multiple commands, they are:           @x086|@w","helpfile")
@@ -2089,7 +2099,7 @@ end
 	end
 
 	function DebugNote(message)
-   if(debug) then
+   if debug == "true" then
 	   Note(message)
    end
 	end
@@ -2104,8 +2114,19 @@ end
 	end
 
 	function ToggleDebug()
-	   debug = not debug
-	   NotifyNote("Debug is now " .. tostring(debug))
+		if debug == "false" then
+			debug = "true"
+			print(debug)
+			SetVariable("debug", "true")
+			util.print("@x238Affects window Debug is now @GON@x238.")
+		else
+			debug = "false" 
+			print(debug)
+			util.print("@x238Affects window Debug is now @ROFF@x238.")
+			SetVariable("debug", "false")
+		end
+	   --debug = not debug
+	  -- NotifyNote("Debug is now " .. tostring(debug))
 	   SaveState()
 	end
 
@@ -2129,8 +2150,8 @@ end
    end
 	--  Spell   : Elemental ward (10:41)
 	   AddTriggerEx("GRAB_SPELLS_TIME", "^Spell   : (.*?) (\\(\\d+:\\d+\\))$", "", flags, custom_colour.NoChange, 0, "", "AddAffectTimed", 0, 100)
-	   print(wildcards[1])
-	   print(wildcards[2])
+	   DebugNote(wildcards[1])
+	   DebugNote(wildcards[2])
 	--  AddTriggerEx("GRAB_SPELLS_TIME", "^(.*?) +(?:modifies .*? -?\\d+ )?for (\\d+) pulses.*?$", "", flags, custom_colour.NoChange, 0, "", "AddAffectTimed", 0, 100)
 
 	--  AddTriggerEx("GRAB_SPELLS_INDEFINITELY", "^(.*?) +(indefinitely).*$", "", flags, custom_colour.NoChange, 0, "", "AddAffect", 0, 100)
@@ -2310,7 +2331,7 @@ end
 		 WindowRectOp (winid, 2, movieInfo.x, movieInfo.y, movieInfo.x + image_size, movieInfo.y + image_size, ColourNameToRGB("bg_color"))
 		 WindowRectOp (winid, 2, movieInfo.x, movieInfo.y + image_size + text_margin_top, movieInfo.x+image_size, movieInfo.y + image_size + text_margin_top + text_height, ColourNameToRGB("bg_color"))
 		 bad_affect = true
-		 print("BAD AFFECT: ", bad_affect)
+		 DebugNote("BAD AFFECT: ", bad_affect)
 		 PlayMovieFrame (v) -- this is added in place of window(true) to avoid the flickering (MAYBE MOVE BACK DOWN TO WINDOW(TRUE) SPOT)
        else
          DebugNote("Showing disabled icon for "..spell)
@@ -2449,7 +2470,7 @@ end
 
          -- Here we need to draw the image in a hidden window, resize that window, draw the image transparently, and later draw it stretched
 		 image_down = filename
-		 tprint(movieInfo)
+		 --tprint(movieInfo)
 
 		 if WindowLoadImage (hiddenWindow, image_down, filename) == 0 then
 			WindowResize (hiddenWindow, WindowImageInfo(hiddenWindow, image_down, 2), WindowImageInfo(hiddenWindow, image_down, 3), ColourNameToRGB(bg_color))
@@ -2553,7 +2574,7 @@ end
 			  elseif timerWidth <= 9 then
 				timerWidth = timerWidth + 16
 			  end
-			--  print(timerWidth)
+			--  DebugNote(timerWidth)
                WindowText(winid, "font", spell_timer, infos[i].x + image_size/4, infos[i].y + image_size + text_margin_top, 0, 0, timer_color)
            end
        end
@@ -2748,10 +2769,10 @@ end
 
    if opt == 1 then -- Bring to Front
 	   CallPlugin("462b665ecb569efbf261422f","boostMe", winid)
-	   --  print("Bring to Front")
+	   --  DebugNote("Bring to Front")
    elseif opt == 2 then -- Send to back
 	   CallPlugin("462b665ecb569efbf261422f","dropMe", winid)
-	   --  print("Sent to Back")
+	   --  DebugNote("Sent to Back")
    elseif opt == 3 then -- Image size small
        image_size = 32
 	   SetVariable("image_size", image_size)
