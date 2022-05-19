@@ -337,12 +337,12 @@ version="1.0"
 	require "utility"
 	dofile(GetInfo(60).."telnet_options.lua"); TelnetOptionOn(TELOPT_SPELLUP)
 	require "serialize"
-require "gmcphelper"
-dofile(GetInfo(60) .. "aardwolf_colors.lua")
+    require "gmcphelper"
+    dofile(GetInfo(60) .. "aardwolf_colors.lua")
 --dofile(GetInfo(60).."telnet_options.lua")
-TelnetOptionOn(TELOPT_SPELLUP) -- fiendish recommends this way to enable the spellup tags silently
-TelnetOptionOn(20)
-TelnetOptionOn(TELOPT_SKILLGAINS)
+    TelnetOptionOn(TELOPT_SPELLUP) -- fiendish recommends this way to enable the spellup tags silently
+    TelnetOptionOn(20)
+    TelnetOptionOn(TELOPT_SKILLGAINS)
 local currentState = -1 -- uninitialized
 local maxmana = -1 -- uninitialized
 local currentmana = -1 -- uninitialized
@@ -370,6 +370,7 @@ local ascii_2_utf82 = {
 		["1F"]="E29490", -- ┐
 		["3F"]="E29498", -- ┘
 		["2F"]="E29494", -- └
+		
 		}
 
 --[[
@@ -863,6 +864,10 @@ function HSPmain(name, line, wildcards)
 		hspsetgaiasfocus(rest)
 	elseif first == "help" then
 		HadarHelp(rest)
+	elseif first == "check" then
+		HadarShow(rest)
+	elseif first == "show" then
+		HadarShow(rest)
 	elseif first == "percent" then
 		hspsetpercent(rest)
 	elseif first == "cskill" then
@@ -2001,6 +2006,24 @@ function hspshowcskill(str)
 		hadarprint("Current V2 Cskill set to: "..Spellups["AS"]["list"][Spellups["EX"]["clanskill"]]["name"].." @C[@G"..Spellups["EX"]["clanskill"].."@C]@w","script")
 	end
 end
+function DebugStatus()
+	if GetVariable("debug") == "true" then 
+	   hadarprint("@x238| Debug Mode: @Gon                                                           @x238|","helpfile2")
+	else
+		hadarprint("@x238| Debug Mode: @Roff                                                          @x238|","helpfile2")
+	end
+	end
+
+function HadarShow(str)
+	hadarprint("@x238+-------------------------[@RA@rffects @RW@rindow @RS@rtatus@x238]--------------------------+@w","helpfile2")
+    DebugStatus()
+	hadarprint("@x086|                  @x214the spell name, these will be re-cast during combat @x086|","helpfile2")
+	hadarprint("@x086|                                                                      @x086|","helpfile2")
+	hadarprint("@x086| @x208hsp combat <SN or name>    @x110-@x208 will add or remove the skill from the   @x086|","helpfile2")
+	hadarprint("@x086|                              @x208list to recast in combat                @x086|","helpfile2")
+	hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
+	hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
+end
 
 function HadarHelp(str)
 	local arg, rest
@@ -2051,12 +2074,12 @@ function HadarHelp(str)
 		hadarprint("@x086|                           SN = Skill Number                          @x086|","helpfile2")
 		hadarprint("@x086+----------------------------------------------------------------------+@w","helpfile2")
 	else
-		hadarprint("@x086+-------------------------@G[@RA@rffects @RW@rindow @x238| @CA@cuto @CS@cpells @WV:"..GetPluginInfo (GetPluginID (), 19).."@G]@x086-------------------------+@w","helpfile")
-		hadarprint("@x086| @x214hsp help                @x110- @x214Displays this helpfile                      @x086|@w","helpfile")
-		hadarprint("@x086| @x208hsp noauto <number>     @x110- @x208number optional, sets a spellnumber to not  @x086|@w","helpfile")
-		hadarprint("@x086|                           @x208be recast, no argument to see list          @x086|@w","helpfile")
-		hadarprint("@x086|                           @x208EG. hsp noauto 58                           @x086|@w","helpfile")
-		hadarprint("@x086| @x214hsp noauto clear        @x110- @x214clears your noauto list                     @x086|@w","helpfile")
+		hadarprint("@x086+------------------@G[@RA@rffects @RW@rindow @x238| @CA@cuto @CS@cpells @WV:"..GetPluginInfo (GetPluginID (), 19).."@G]@x086------------------+@w","helpfile")
+		hadarprint("@x086│ @x214hsp help                @x110- @x214Displays this helpfile                     @x086│@w","helpfile")
+		hadarprint("@x086│ @x208hsp noauto <number>     @x110- @x208number optional, sets a spellnumber to not @x086│@w","helpfile")
+		hadarprint("@x086|                           @x208be recast, no argument to see list         @x086|@w","helpfile")
+		hadarprint("@x086|                           @x208EG. hsp noauto 58                          @x086|@w","helpfile")
+		hadarprint("@x086| @x214hsp noauto clear        @x110- @x214clears your noauto list                    @x086|@w","helpfile")
 		hadarprint("@x086| @x208hsp disable <check>     @x110- @x208Turns the script on or off, check is status@x086|@w","helpfile")
 		hadarprint("@x086| @x214hsp reload              @x110- @x214 reloads the skills/spells use after tier  @x086|@w","helpfile")
 		hadarprint("@x086| @x208hsp autoaura <command>  @x110- @x208Has multiple commands, they are:           @x086|@w","helpfile")
@@ -2847,7 +2870,6 @@ end
 		hadarprint("@YInstalling @c"..GetPluginName().."@Y version @c"..GetPluginInfo (GetPluginID (), 19).."@Y...","script")
 		hadarprint("had help (to see all of hadar's plugin helpfiles), or hsp help to just see this one","script")
 
-	   debug = false
 	   WindowFont(winid, "font", font_name, font_size, false, false, false, false, 0)
 	   SetupAffectTriggers()
 	   	  
@@ -2969,6 +2991,15 @@ check saf sanc and aflags? ^^
 
 If sanctuary is ON via some methods, and you wear the sanc aura, leave the timer and when it falls if the aura is on
 change timer to PERMA
+
+[DONE] hsp reload needs to clear the fuckin gif table, and redraw the window
+
+[DONE] Fixed debug mode and removed some tprints
+
+
+
+elemental focus needs to not say 0 if element not chosen
+32x32 needs text moved over to refresh cleanly
 
 
 Aardwolf Aura of Sanctuary stops floating around you.
