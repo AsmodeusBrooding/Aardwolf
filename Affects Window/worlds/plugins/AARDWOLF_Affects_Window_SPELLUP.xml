@@ -48,7 +48,11 @@ version="1.0"
   enabled="y"
   sequence="100"
   send_to="12"
-  ><send>tprint(infos)</send>
+  ><send>tprint(infos)
+  for i, j in ipairs(infos) do
+	print(i)
+  end
+</send>
 </alias>
     <alias
       regexp="y"
@@ -387,7 +391,6 @@ Saori, tester
 
 TODO:
 
-
 ]]
 
 	-- Miniwindow State
@@ -411,8 +414,13 @@ TODO:
 	local timer_color = Theme.BODY_TEXT
     -- the width and height of each image
     local image_size = GetVariable("image_size") or 32
+	ICON_WIDTH = image_size
+	ICON_HEIGHT = image_size
+	local pos_x = GetVariable("pos_x") or 100
+    local pos_y = GetVariable("pos_y") or 100
+	BUTTON_EDGE = ColourNameToRGB "black"
 	local bad_affect = false
-    
+    OFFSET = 2  -- gap inside box
     -- How tall each row of text is (for the timers)
     local text_height = 20
     -- The space between the icon and the text
@@ -423,7 +431,7 @@ TODO:
 
      -- When each spell will run out
     end_times = {}
-
+    location = {}
 	-- Global Vars
 	infos = {}
 	affects = {}
@@ -452,6 +460,133 @@ TODO:
 	   ["237"] = "web",
 	   ["74"] = "sleep"
     }
+
+
+	spelllist = {
+		{
+		  name="Sanctuary",
+		  tooltip="Sanctuary",
+		  text="Sanctuary",
+		  send="c sanc",
+		  filename="worlds\\plugins\\images\\affects\\nayrus_love_%03i.png",
+		  disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, 
+		{ 
+		name="Haste",
+		tooltip="Haste",
+		text="Haste",
+		send="c haste",
+		filename="worlds\\plugins\\images\\affects\\haste_%03i.png",
+		disabled_filename="worlds\\plugins\\images\\affects\\haste_down.png",
+	  },  
+
+	  } -- end of spell table
+
+	  buttons = {
+ 
+		-- Priority 1
+	  { name = "Button1",
+		tooltip="Sanctuary",
+		text="Sanctuary",
+		send="c sanc",
+		filename="worlds\\plugins\\images\\affects\\nayrus_love_%03i.png",
+		disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+	  },   -- end of Button 1
+	   
+		-- Button 2
+	  { name = "Button2",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 2
+	   
+		-- Button 3
+	  { name = "Button3",
+        tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 3
+	   
+		-- Button 4
+	  { name = "Button4",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 4
+	   
+		-- Button 5
+	  { name = "Button5",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 5
+	   
+		-- Button 6
+	  { name = "Button6",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 6
+	   
+		-- Button 7
+	  { name = "Button7",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 7
+	   
+		-- Button 8
+	  { name = "Button8",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 8
+	   
+		-- Button 9
+	  { name = "Button9",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+		}, -- end of Button 9
+
+	   		-- Button 10
+	  { name = "Button10",
+	    tooltip="Sanctuary",
+	    text="Sanctuary",
+	    send="c sanc",
+	    filename="empty",
+	    disabled_filename="worlds\\plugins\\images\\affects\\nayrus_love_down.png",
+	  }, -- end of Button 10
+	 
+	   --> add more priorities here
+	   
+	   
+	  } -- end of priorities table
+	  
+	  assert (loadstring (GetVariable ("saved_buttons") or "saved_buttons = nil")) ()
+
+if (saved_buttons) then
+  buttons = saved_buttons
+end
+
+
+
 
 	path_prefix = "worlds\\plugins\\images\\affects\\"
     debug = GetVariable("debug") or "false"
@@ -2229,7 +2364,6 @@ end
                DebugNote(string.format("%02d:%02d:%02d", hours, minutes, seconds))
                DebugNote("timer retval: " .. AddTimer(spell, hours, minutes, seconds, "", timer_flag.Enabled + timer_flag.OneShot, "RemoveAffectTimed"))
                DebugNote("timer: " .. GetTimer(spell))
-               --tprint(infos)
                DebugNote(infos.x)
                --  local i, v = FindAffectInInfos(spell)
                --  tprint(FindAffectInInfos(spell)[1])
@@ -2412,7 +2546,6 @@ end
 
 	function PlayMovie (info)
 	   movieInfo = info
-
    if not info then
 	   return
    end -- if
@@ -2475,7 +2608,6 @@ end
        
        local imageWidth = image_size
        local imageHeight = image_size
-
        -- Draw the correct frame number if the spell is enabled, otherwise draw the disabled image
        if (movieInfo.enabled) then
          filename = string.format (movieInfo.filename, movieInfo.currentFrame)
@@ -2493,7 +2625,6 @@ end
 
          -- Here we need to draw the image in a hidden window, resize that window, draw the image transparently, and later draw it stretched
 		 image_down = filename
-		 --tprint(movieInfo)
 
 		 if WindowLoadImage (hiddenWindow, image_down, filename) == 0 then
 			WindowResize (hiddenWindow, WindowImageInfo(hiddenWindow, image_down, 2), WindowImageInfo(hiddenWindow, image_down, 3), ColourNameToRGB(bg_color))
@@ -2526,7 +2657,7 @@ end
 	infos = {}
 	warned = false
 for i, v in ipairs(tmp_infos) do
-	x, y = FindNextPos(image_size)
+	x, y = FindNextPos(image_size+2)
 	v.x = x
 	v.y = y
 if(not warned and (x > win_width or y > win_height)) then
@@ -2569,6 +2700,12 @@ end
        return "??"
    end
     end
+
+	function swap(table1, table2, name)
+		local tmp = table1[name]
+		table1[name] = table2[name]
+		table2[name] = tmp
+	end
 
 	-- --------------------------------------------------------------------
 	-- PlayAllMovieFrames - called by a timer every 1/10 second - calls
@@ -2651,7 +2788,7 @@ end
 
 	   -- Find position
 
-	   x,y = FindNextPos(image_size)
+	   x,y = FindNextPos(image_size+2)
 	   PlayMovie {
 	   filename = filename,
        disabled_filename = disabled_filename,
@@ -2681,6 +2818,7 @@ end
 	   --DebugNote("cur_col " .. cur_col)
 	   --DebugNote("cols " .. cols)
 	   --DebugNote("rows " .. rows)
+	   --print("x: "..x.." y: "..y)
 	   return x, y
 	end
 
@@ -2748,30 +2886,89 @@ end
 	end
 
 	function ResizeReleaseCallback()
-	   --DebugNote("ResizeReleaseCallback")
+	   --print("ResizeReleaseCallback")
 	   window(true)
 	   SaveState()
 	end
 
 	function MouseDown(flags, id)
-	   --DebugNote("MouseDown")
-   if id == "resize" then
-	   start_x, start_y = WindowInfo(winid, 17), WindowInfo(winid, 18)
-   end
+		--print("MouseDown")
+	if id == "resize" then
+		start_x, start_y = WindowInfo(winid, 17), WindowInfo(winid, 18)
+	end
+	local x, y = WindowInfo(winid, 14), WindowInfo(winid, 15)
+	--print("X: "..x.." Y: "..y)
+	local n = tonumber (x)
+	
+	slot = -1
+ for i, j in ipairs(infos) do
+	 --print("INFOS[I].X: ",infos[i].x)
+	 --print("INFOS[I].Y: ",infos[i].y)
+	 --tprint(infos[1])
+	 if x > infos[i].x and x <= (infos[i].x + image_size) and y > infos[i].y and y < (infos[i].y + image_size) then
+		 clickableX = infos[i].x
+		 clickableY = infos[i].y	
+		 slot = i
+		 --tprint(infos[i])
+		 button = infos[i].filename
+		 buttonInfo = infos[i].enabled
+	 end
+ end
+ 
+ if slot == -1 then return end
+ 
+ --print("ROW: " ,rows)
+ --print("COLUMN: ", cols)
+ 
+ --print("SLOT: ", slot)
+ --print("CLICKABLEX: ",clickableX)
+ --print("CLICKABLEY: ",clickableY)
+ --if x <= clickableX then
+ --print("BUTTON: ", button)
+ --print("BUTTON ENABLED?: ", buttonInfo)
+	 
+ WindowRectOp (winid, 1, clickableX-2, clickableY-2, clickableX+image_size+2, clickableY+image_size+2, ColourNameToRGB("red"))
+ 
+   -- WindowRectOp (winid, 2, firstx + 1, firsty + 1, firstx+image_size, firsty+image_size, ColourNameToRGB("red"))
+ --end
+	 end
+
+	 function find(tbl, val)
+		for k, v in pairs(tbl) do
+			if v == val then return k end
+		end
+		return nil
 	end
 
 	function MouseUp(flags, id, win)
-	   --DebugNote("MouseUp")
+	   --print("MouseUp")
+	   --local button = buttons [n]
 	   if bit.band(flags, 0x20) ~= 0 then -- right click
 	      right_click_menu()
 	   end
 	   pos_x, pos_y = WindowInfo(winid, 10), WindowInfo(winid, 11)
 	   SaveState()
+	   if slot == -1 then return end
+	   WindowRectOp (winid, 1, clickableX-2, clickableY-2, clickableX+image_size+2, clickableY+image_size+2, ColourNameToRGB("bg_color"))
+	  -- show_window() --MAYBE to clear the red line
+	  if buttonInfo ~= true then
+    -- print(button)
+	 button = button:gsub("%worlds\\plugins\\images\\affects\\", "")
+	 button = button:gsub("%W%W%w+.png", "")
+	 --print("BUTTON: ",button)
+	 for k, v in pairs(affect_icons) do 
+	if button == affect_icons[k] then
+		key = find(affect_icons, button)
+		Execute("c "..key)
+end
+end
+	end
 	end
 
-	function right_click_menu()
+	function right_click_menu(buttonIndex)
 	   local x, y = WindowInfo(winid, 14), WindowInfo(winid, 15)
-
+	   --print(x, y)
+       if slot == -1 then
 	   local str = "!"
 
 	   str = str.."Bring to Front"
@@ -2803,9 +3000,125 @@ end
        image_size = 64
 	   SetVariable("image_size", image_size)
    end
+end
+local options = {}
+-- generate the listbox options
+for k,v in ipairs(spelllist) do
+  table.insert(options, v.name)
+end
+opt = utils.listbox ("Choose here from a list of spells", "Pick a spell for your button ...", options)
+if (opt == nil or opt == "") then
+	return
+end
+buttonIndex = slot
+opt = tonumber(opt)
+-- buttonIndex contains the button we want to modify, opt is the spell we want to choose
+local chosenspell = spelllist[opt]
+local button = buttons[buttonIndex]
+--Replace all of button's properties with the spells
+DebugNote("Setting "..button.name.." to "..chosenspell.name)
+button.name = chosenspell.name
+button.text = chosenspell.text
+button.tooltip = chosenspell.tooltip
+button.send = chosenspell.send
+button.filename = chosenspell.filename
+button.disabled_filename = chosenspell.disabled_filename
+
+-- this is used to swap entries in the INFOS table when a filename in the buttons table matches a filename in the infos table
+for i, j in ipairs(infos) do
+	if (infos[i].enabled) then
+	 for n, v in ipairs (buttons) do
+		 --	tprint(buttons)
+ --DebugNote(movieInfo.filename)
+		 if infos[i].filename == v.filename and (i ~= n) then
+		  --   DebugNote("I: ",i)
+		 --	DebugNote("N: ",n)
+			 swap(infos[i], infos[n], "filename")
+			 swap(infos[i], infos[n], "disabled_filename")
+			 swap(infos[i], infos[n], "enabled")
+			 swap(infos[i], infos[n], "frames")
+			 swap(infos[i], infos[n], "lastDrawState")
+			 swap(infos[i], infos[n], "start_time")
+			 swap(infos[i], infos[n], "currentFrame")
+		 end 
+		end
+	end
+end
+
+
    SaveState()
+  -- WindowRectOp (winid, 1, clickableX-2, clickableY-2, clickableX+image_size+2, clickableY+image_size+2, ColourNameToRGB("bg_color"))
+  -- redraw_buttons()
 	   window(true)
     end
+
+	function redraw_buttons()
+		for n, v in ipairs (buttons) do
+			DebugNote(buttons)
+			DebugNote(n)
+			--tprint(v)
+			DebugNote(v.filename)
+		  if v.filename then
+			if WindowLoadImage (winid, n, GetInfo (66) .. v.filename) ~= error_code.eOK then
+				DoAfterSpecial (1, string.format ([[
+					ColourNote ("white", "red", "Could not load image '%s'")]],
+								string.gsub (GetInfo (66) .. v.filename, '\\', '\\\\')),
+								sendto.script)
+			end -- if
+		  end -- if icon specified
+			 
+		  local x1, y1, x2, y2
+	   
+		  -- where to draw the icon
+		 -- if horizontal then
+			x1, y1 = (n - 1) * (ICON_WIDTH + OFFSET) + OFFSET, OFFSET
+			x2, y2 = n * (ICON_WIDTH + OFFSET), ICON_HEIGHT + OFFSET
+		--  else
+		--	x1, y1 = OFFSET, (n - 1) * (ICON_HEIGHT + OFFSET) + OFFSET
+		--	x2, y2 = ICON_WIDTH + OFFSET, n * (ICON_HEIGHT + OFFSET)
+		--  end -- if
+		 
+		  -- remember where to draw the frame, for mouse clicks
+		  location [n] = {
+			x1 = x1 - 1,
+			y1 = y1 - 1,
+			x2 = x2 + 1,
+			y2 = y2 + 1
+		  }
+		 
+		  -- draw the image
+		  if WindowDrawImage(winid, n,
+						  x1, y1,   -- left, top
+						  x2, y2,  -- right, bottom
+						  2)  -- mode - stretch or shrink
+			  ~= error_code.eOK then
+			WindowRectOp (winid, 2, x1, y1,   -- left, top
+						  x2, y2,  -- right, bottom
+						  000000)
+		--	if v.name then
+		--	  AddText(v.name, n, false, Theme.BODY_TEXT)
+		--	end
+		  end -- if
+		 
+		  -- draw the button border
+		  WindowRectOp (winid, 1,
+						location [n].x1, location [n].y1, location [n].x2, location [n].y2,
+						BUTTON_EDGE)
+		 
+		  -- make a hotspot we can click on
+		  WindowDeleteHotspot(winid, n)
+		  WindowAddHotspot(winid, n,  
+					   location [n].x1, location [n].y1, location [n].x2, location [n].y2,   -- rectangle
+					   "",   -- mouseover
+					   "",   -- cancelmouseover
+					   "mousedown",
+					   "cancelmousedown",
+					   "mouseup",
+					   v.tooltip,  -- tooltip text
+					   1, 0)  -- hand cursor
+						   
+		end --  for each world
+	  end
 
 	function CancelMouseOver(flags, id)
 	   --DebugNote("CancelMouseOver")
@@ -2947,6 +3260,13 @@ end
    	else
 		utfset = false
    end
+    
+  local x, y, mode =
+  tonumber (GetVariable ("pos_x")) or 0,
+  tonumber (GetVariable ("pos_y")) or 0,
+  tonumber (GetVariable ("mode")) or WINDOW_POSITION -- top right
+
+  -- redraw_buttons()
    window(true)
 end
 
@@ -2968,6 +3288,7 @@ end
 			Spellups["GL"]["initilized"] = "yes"
 			SetVariable ("Spellups", "Spellups = " .. serialize.save_simple (Spellups))
 			SetVariable ("pastfirstinstall", "true")
+			SetVariable ("saved_buttons", serialize.save("buttons"))
 			SaveState()
 		end -- function OnPluginSaveState
 
