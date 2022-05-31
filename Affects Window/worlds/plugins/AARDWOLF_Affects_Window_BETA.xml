@@ -5,7 +5,7 @@
 <muclient>
 <plugin
 name="AARDWOLF_Affects_Window"
-author="Khadaji, Tinypotato"
+author="Khadaji, Elisius, Tinypotato"
 id="353de94ba6c43260d839e256"
 save_state="y"
 language="Lua"
@@ -69,6 +69,7 @@ version="1.0"
       regexp="y"
       send_to="12"
       sequence="100"
+	  omit_from_output="y"
       script="AddAffectTimed"
       >
   </trigger>
@@ -78,6 +79,7 @@ version="1.0"
       regexp="y"
       send_to="12"
       sequence="100"
+	  omit_from_output="y"
       script="RemoveAffect"
       >
   </trigger>  
@@ -243,6 +245,22 @@ script="SlistUpdate"
 		send="c haste",
 		filename="worlds\\plugins\\images\\affects\\haste_%03i.png",
 		disabled_filename="worlds\\plugins\\images\\affects\\haste_down.png",
+	  },  
+	  { 
+		name="Elemental Focus Fire",
+		tooltip="Elemental Focus Fire",
+		text="Elemental Focus Fire",
+		send="c \'elemental focus\' fire",
+		filename="worlds\\plugins\\images\\affects\\elementalfocus_%03i.png",
+		disabled_filename="worlds\\plugins\\images\\affects\\elementalfocus_down.png",
+	  },  
+	  { 
+		name="Invis",
+		tooltip="Invis",
+		text="Invis",
+		send="c invis",
+		filename="worlds\\plugins\\images\\affects\\invis_%03i.png",
+		disabled_filename="worlds\\plugins\\images\\affects\\invis_down.png",
 	  },  
 
 	  } -- end of spell table
@@ -856,6 +874,24 @@ end
 		warned_about_missing_files = true
 		ErrorNote ("Could not find any frames matching " .. filename)
 	end
+
+	 -- this is used to swap entries in the INFOS table when a filename in the buttons table matches a filename in the infos table
+	 for i, j in ipairs(infos) do
+		if (infos[i].enabled) then
+		 for n, v in ipairs (buttons) do
+			 if infos[i].filename == v.filename and (i ~= n) then
+				 swap(infos[i], infos[n], "filename")
+				 swap(infos[i], infos[n], "disabled_filename")
+				 swap(infos[i], infos[n], "enabled")
+				 swap(infos[i], infos[n], "frames")
+				 swap(infos[i], infos[n], "lastDrawState")
+				 swap(infos[i], infos[n], "start_time")
+				 swap(infos[i], infos[n], "currentFrame")
+			 end 
+			end
+		end
+	end
+	
 	 end
  --SHOULD THIS BE IMAGE_SIZE??
 	 function FindNextPos(size)
@@ -1166,7 +1202,7 @@ Aardwolf Aura of Sanctuary begins floating around you.
 -- [DONE] MAKE NUMBERS SHOW GREEN WHEN OVER 10 MINUTES, YELLOW WHEN UNDER 10, RED WHEN UNDER 5 BLACK WHEN OFF?
 add grey icons of all icons
 add PERMA or infinity timer
-add right click system to set priorities
+[DONE] add right click system to set priorities
 add protection good icon
 add protection evil icon
 add sanc aura wear/remove
