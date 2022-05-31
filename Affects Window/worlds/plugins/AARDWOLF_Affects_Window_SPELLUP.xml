@@ -437,7 +437,8 @@ TODO:
 	affects = {}
 	warned_about_missing_files = false
 	-- In game name to filename map
-
+    -- If you want to add your own spells in here, the spell name should be the key, and the filename should be the value.. 
+	-- the file should be located in the worlds/plugins/images/affects folder. See how they look and are named by having a look in your folder
 	affect_icons = {
 	   ["58"] = "invis",
 	   ["526"] = "elementalfocus",
@@ -2801,6 +2802,24 @@ end
 	   warned_about_missing_files = true
 	   ErrorNote ("Could not find any frames matching " .. filename)
    end
+
+   	 -- this is used to swap entries in the INFOS table when a filename in the buttons table matches a filename in the infos table
+	 for i, j in ipairs(infos) do
+		if (infos[i].enabled) then
+		 for n, v in ipairs (buttons) do
+			 if infos[i].filename == v.filename and (i ~= n) then
+				 swap(infos[i], infos[n], "filename")
+				 swap(infos[i], infos[n], "disabled_filename")
+				 swap(infos[i], infos[n], "enabled")
+				 swap(infos[i], infos[n], "frames")
+				 swap(infos[i], infos[n], "lastDrawState")
+				 swap(infos[i], infos[n], "start_time")
+				 swap(infos[i], infos[n], "currentFrame")
+			 end 
+			end
+		end
+	end
+	
 	end
 --SHOULD THIS BE IMAGE_SIZE??
 	function FindNextPos(size)
