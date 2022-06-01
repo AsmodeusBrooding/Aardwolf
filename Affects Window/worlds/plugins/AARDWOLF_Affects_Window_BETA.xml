@@ -165,7 +165,6 @@ script="SlistUpdate"
 	require "mw"
 	require "mw_theme_base"
 	require "tprint"
-	require "utility"
 	require "serialize"
 
 	-- Miniwindow State
@@ -400,11 +399,11 @@ end
 			debug = "true"
 			print(debug)
 			SetVariable("debug", "true")
-			util.print("@x238Affects window Debug is now @GON@x238.")
+			utilprint("@x238Affects window Debug is now @GON@x238.")
 		else
 			debug = "false" 
 			print(debug)
-			util.print("@x238Affects window Debug is now @ROFF@x238.")
+			utilprint("@x238Affects window Debug is now @ROFF@x238.")
 			SetVariable("debug", "false")
 		end
 	  SaveState()
@@ -458,7 +457,7 @@ end
 			slistCommandSent = true
 			EnableTriggerGroup("HSPslistCapture", true)
 			EnableTrigger("HSPRecoveriesStart", true)
-			util.print("@x238[@RD@rE@RM@rO@RN@x238] @x208Getting Skills/Spells")
+			utilprint("@x238[@RD@rE@RM@rO@RN@x238] @x208Getting Skills/Spells")
 			SendNoEcho("slist hsp")
 		end
 	end
@@ -467,7 +466,7 @@ end
 		EnableTriggerGroup("HSPslistCapture", false)
 		SaveState()
 
-		util.print("@x238[@RD@rE@RM@rO@RN@x238]@x208 Got all skills/spells")
+		utilprint("@x238[@RD@rE@RM@rO@RN@x238]@x208 Got all skills/spells")
 end
 
 
@@ -502,7 +501,7 @@ end
 				   v.enabled = true
 				   v.start_time = os.time() + duration
 				 end -- if
-	--	util.print("SN:"..sn..", NM:"..nm.." DU:"..du)
+	--	utilprint("SN:"..sn..", NM:"..nm.." DU:"..du)
 				end
 			end
 
@@ -821,6 +820,7 @@ end
  
 	end -- PlayAllMovieFrames
 
+---------------------------------------UTILITY FUNCTIONS START-------------------------------------------------
 	function swap(table1, table2, name)
 		local tmp = table1[name]
 		table1[name] = table2[name]
@@ -832,6 +832,12 @@ end
 	   for _ in pairs(T) do count = count + 1 end
 	   return count
 	end
+
+	function utilprint(string)
+		AnsiNote(ColoursToANSI(string))
+	  end
+
+---------------------------------------UTILITY FUNCTIONS END----------------------------------------------------
 
 	-- 16x16 at top, 32x32 below
 	-- Offsets due to window border
@@ -1124,11 +1130,11 @@ end
 
 
 	function loaded()
-		util.print("@W--------------------------------------------------------------------------------")
-		util.print("@WPlugin Name  : @RG@Yr@Ga@Cp@Bh@Mi@mc@Ra@Yl @x238Affects Window")
-		util.print("@WAuthor       : @x238Khadaji, TinyPotato")
-		util.print("@WVersion      : @G" .. version)
-		util.print("@W--------------------------------------------------------------------------------")
+		utilprint("@W--------------------------------------------------------------------------------")
+		utilprint("@WPlugin Name  : @RG@Yr@Ga@Cp@Bh@Mi@mc@Ra@Yl @x238Affects Window")
+		utilprint("@WAuthor       : @x238Khadaji, TinyPotato")
+		utilprint("@WVersion      : @G" .. version)
+		utilprint("@W--------------------------------------------------------------------------------")
 		end
 
 	function OnPluginInstall()
@@ -1152,7 +1158,8 @@ end
 			--	if currentState == 3 then
 					SendSlistCommand()
 			--	end
-				end		
+				end	
+				
 
 	function OnPluginEnable()
 	   window(true)
