@@ -1,7 +1,6 @@
 # Khadaji's Aardwolf Affects Window
 Here is a horrible readme. (I'll improve this later)
 
-![YAP](https://i.imgur.com/KWKMWUy.mp4)
 
 You can grab this entire subdirectory by following this link:
 
