@@ -2,6 +2,10 @@
 Here is a horrible readme. (I'll improve this later)
 
 
+
+https://user-images.githubusercontent.com/56989870/171307785-9dc19e0f-c718-424f-ae9d-ed7a3d233d77.mp4
+
+
 You can grab this entire subdirectory by following this link:
 
 https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/AsmodeusBrooding/Aardwolf/tree/main/Affects%20Window/worlds/plugins
