@@ -1,6 +1,11 @@
 # Khadaji's Aardwolf Affects Window
-Here is a horrible readme. (I'll improve this later)
 
+Located here is the animated affects window plugin for the Aardwolf MUSHclient.
+The plugin can provide a visual cue to knowing when you're spelled up, unspelled, or when 
+your spells are GOING to run out, giving you proper time to know you should re-up your
+sanctuary or other important spells before starting a tough battle.
+This plugin is also very useful for PK, as you can easily see if you're cursed, blinded,
+webbed, etc without spending precious time to check.
 
 
 https://user-images.githubusercontent.com/56989870/171307785-9dc19e0f-c718-424f-ae9d-ed7a3d233d77.mp4
